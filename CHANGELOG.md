@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.0.0 — unreleased
+## 1.0.0-beta.1 — 2026-10-05
 
-First release.
+First pre-release. The licence agreement is still in draft, and licence
+checks stay off until the Polar store exists.
 
 - Licensed under the Cloudflare Tools Licence Agreement: free on development
   and staging sites, one paid activation per public website. See `LICENSE`.

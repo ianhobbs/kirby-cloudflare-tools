@@ -39,7 +39,7 @@ if (class_exists(Cloudflare::class) === false) {
 
 Kirby::plugin(
     name: 'ianhobbs/cloudflare-tools',
-    version: '1.0.0',
+    version: '1.0.0-beta.1',
     // Shown in the Panel's System view, with a status that opens the
     // activation dialog. Read from the stored state: no network call.
     license: fn (Plugin $plugin) => LicenseManager::fromOptions()->toPanel($plugin),

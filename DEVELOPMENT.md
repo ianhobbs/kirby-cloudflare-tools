@@ -234,7 +234,7 @@ A site can do steps 3 and 4 without touching the plugin, through the
 
 ## Licensing
 
-How the licence is sold is in [VENDOR-STRATEGY.md](VENDOR-STRATEGY.md); the
+How the licence is sold is in VENDOR-STRATEGY.md (kept outside the repository); the
 terms are in `LICENSE`. In the code:
 
 - `Licensing\LicenseManager` works out the status (`demo`, `missing`,
@@ -275,7 +275,7 @@ path.
 
 Selling the plugin (the licence model, seller, tiers, and what must change
 before the first public push) is covered in
-[VENDOR-STRATEGY.md](VENDOR-STRATEGY.md).
+VENDOR-STRATEGY.md (kept outside the repository).
 
 1. Update the version in `index.php` (`version:`), `package.json`, and
    `dev/tests/Feature/PluginTest.php`; add a `CHANGELOG.md` entry.
