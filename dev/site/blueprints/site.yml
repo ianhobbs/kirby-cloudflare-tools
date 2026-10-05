@@ -1,0 +1,8 @@
+title: Cloudflare Tools dev site
+
+sections:
+  pages:
+    type: pages
+    templates:
+      - home
+      - default

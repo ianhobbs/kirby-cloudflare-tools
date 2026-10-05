@@ -1,0 +1,181 @@
+# Cloudflare Tools for Kirby — Licence Agreement
+
+Version 1.0 — DRAFT for legal review, not yet in force
+Copyright (c) 2026 Ian Hobbs. All rights reserved, except as granted below.
+
+## About this Agreement
+
+The source code of Cloudflare Tools for Kirby is publicly available, but the
+plugin is **not free software**. You may use it without paying on
+development and staging sites. Every public website that uses it needs a
+paid licence.
+
+By downloading, installing or using the Plugin, you agree to this Agreement.
+If you don't agree, don't download, install or use the Plugin.
+
+## Summary
+
+This summary isn't legally binding; the numbered sections are.
+
+- Try and build with the Plugin for free, for as long as you like, on
+  Development Installations.
+- Each Public Site needs one activation of a paid Licence Key. Your tier
+  sets how many activations you have (for example 1, 5 or unlimited).
+- A licence covers every release of the major version you bought (for
+  example every 1.x release). A new major version may need an upgrade.
+- You may change the code for your own sites. You may not resell it,
+  redistribute it, or share or sell Licence Keys.
+- The Plugin changes your Cloudflare configuration on your instructions.
+  You are responsible for those changes.
+
+## 1. Definitions
+
+- **"We", "Us", "Our"**: Ian Hobbs, the licensor. Contact:
+  <admin@ianhobbsmedia.com>.
+- **"You", "Your"**: the person or organisation using the Plugin. If you buy
+  a licence for a client's website, you are the licensee unless you transfer
+  the licence to the client (section 5).
+- **"Plugin"**: Cloudflare Tools for Kirby (Composer package
+  `ianhobbs/kirby-cloudflare-tools`, registered in Kirby as
+  `ianhobbs/cloudflare-tools`), including its source code, built assets,
+  documentation and any updates We release, whether or not You have
+  modified them.
+- **"Website"**: a single Kirby installation, identified by its domain name
+  and root directory (for example `https://example.com` or
+  `https://shop.example.com`). Each domain, subdomain or root directory is a
+  separate Website. Exception: domains that serve the same Kirby
+  installation and content (for example one domain per language) count as
+  one Website.
+- **"Development Installation"**: a Website used only for development,
+  testing or client review, and only reachable by a restricted group of
+  people. Examples: a local computer, a private network, or a staging site
+  behind a password.
+- **"Public Site"**: any Website that isn't a Development Installation.
+- **"Licence Key"**: the key We or Our reseller issue when You buy a
+  licence. Its tier sets how many Public Sites it may be activated for.
+- **"Activation"**: registering a Licence Key for one Public Site.
+
+## 2. Free use on Development Installations
+
+You may download, install, use, copy and modify the Plugin on Development
+Installations without a Licence Key, with no time limit. This is for
+evaluating the Plugin and for building, testing and previewing Websites.
+
+## 3. Licence for Public Sites
+
+3.1 Each Public Site that uses the Plugin needs one Activation of a valid
+Licence Key. Activate the key as soon as the Website goes public.
+
+3.2 When You buy a Licence Key, We grant You a non-exclusive, worldwide,
+perpetual licence to use the Plugin on as many Public Sites as Your tier
+allows. This licence is transferable only under section 5.
+
+3.3 The licence covers every release of the major version You bought (for
+example all 1.x releases), and You may keep using those releases for as
+long as You like. A later major version may need a new licence or a paid
+upgrade.
+
+3.4 You may move an Activation from one Public Site to another, for example
+when a site moves domain or is shut down. Deactivate it on the old site
+first.
+
+## 4. Source code and modifications
+
+4.1 You may read, study and change the source code of the Plugin.
+
+4.2 You may use modified versions on Your own Development Installations, and
+on Public Sites that have an Activation. Modified versions remain subject to
+this Agreement.
+
+4.3 You may keep the Plugin, modified or not, in private repositories for
+Your own Websites and those of Your clients.
+
+4.4 Forking the repository on GitHub, as GitHub's terms allow, gives You no
+rights beyond those in this Agreement.
+
+## 5. Transfers
+
+5.1 You may transfer a Licence Key, with all its Activations, to another
+person or organisation, for example to the client who owns the Website. You
+must tell Us about the transfer, and You lose the right to use that key.
+
+5.2 You may not split a key's Activations between different licensees.
+
+## 6. Restrictions
+
+You may not:
+
+- (a) sell, rent, lease, sublicense or redistribute the Plugin, modified or
+  not, except as part of a Website it runs on, or as section 4.3 allows;
+- (b) publish or distribute a modified version of the Plugin, including one
+  with its licence checks removed;
+- (c) share, publish, sell or give away Licence Keys, except by a transfer
+  under section 5;
+- (d) remove, disable or work around the Plugin's licence checks, notices or
+  copyright notices on a Public Site that has no Activation; or
+- (e) use the Plugin's source code to build a product that competes with it.
+
+## 7. Licence checks and privacy
+
+To activate and check a Licence Key, the Plugin may send the key and the
+Website's domain name to Us or to Our payment and licensing provider. It
+sends no other information for licensing. The Plugin sends Your Cloudflare
+API credentials only to Cloudflare.
+
+## 8. Your Cloudflare account and Kirby
+
+8.1 The Plugin acts on Your Cloudflare account through the API token You
+provide. Changes it makes on Your instructions (purges, settings, security
+rules, DNS records, pausing Cloudflare) are Your responsibility. Use a token
+limited to the permissions and zones You need.
+
+8.2 Your use of Cloudflare is governed by Cloudflare's own terms. Kirby
+needs its own licence from its publisher; this Agreement doesn't include
+one.
+
+## 9. Refunds
+
+You may ask for a full refund within 30 days of buying a Licence Key. When
+We refund a purchase, the licence for that key ends, and You must stop using
+the Plugin on the Public Sites it was activated for, or buy a new key.
+
+## 10. Termination
+
+10.1 This Agreement ends automatically if You break it and don't put the
+breach right within 14 days of Us telling You about it.
+
+10.2 When it ends, You must stop using the Plugin on Public Sites.
+Sections 6, 8, 11 and 12 continue after it ends.
+
+## 11. Warranty and liability
+
+11.1 The Plugin is provided "as is". We don't promise that it is free of
+errors, or that it works with every version of Kirby, PHP or the Cloudflare
+API.
+
+11.2 Nothing in this Agreement excludes, restricts or modifies any
+guarantee, right or remedy You have under the Australian Consumer Law, or
+any other law, that cannot lawfully be excluded.
+
+11.3 Where We are allowed to limit Our liability, it is limited, at Our
+choice, to supplying the Plugin again or refunding what You paid for the
+Licence Key.
+
+11.4 To the extent the law allows, We are not liable for indirect or
+consequential loss, including lost revenue, lost data, website downtime or
+loss caused by changes to Your Cloudflare configuration.
+
+## 12. General
+
+12.1 This Agreement is governed by the laws in force in the Australian
+state or territory where We have Our principal place of business. You and
+We submit to the non-exclusive jurisdiction of its courts.
+
+12.2 If any part of this Agreement is invalid or unenforceable, the rest
+still applies.
+
+12.3 We may publish new versions of this Agreement. A new version applies
+to Plugin releases published after it. It doesn't change the terms of
+releases You already have.
+
+12.4 Questions about this Agreement: <admin@ianhobbsmedia.com>.

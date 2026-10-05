@@ -1,0 +1,32 @@
+{
+  "name": "ianhobbs/kirby-cloudflare-tools-dev",
+  "description": "Development environment for the kirby-cloudflare-tools plugin — Kirby install + Pest suite. Not published.",
+  "license": "MIT",
+  "type": "project",
+  "require-dev": {
+    "getkirby/cms": "^5.0",
+    "pestphp/pest": "^3.0",
+    "johannschopplich/kirby-helpers": "^7.0",
+    "getkirby/cli": "^1.10"
+  },
+  "scripts": {
+    "test": "pest --colors=always",
+    "test:coverage": "pest --colors=always --coverage",
+    "start": [
+      "Composer\\Config::disableProcessTimeout",
+      "@php -S localhost:8000 kirby/router.php"
+    ]
+  },
+  "scripts-descriptions": {
+    "test": "Run the Pest suite against the plugin in the parent directory",
+    "start": "Run Kirby's built-in server for the visual dev site"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "getkirby/composer-installer": true,
+      "pestphp/pest-plugin": true,
+      "php-http/discovery": false
+    }
+  }
+}

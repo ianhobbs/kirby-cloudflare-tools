@@ -1,0 +1,33 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Node — the built Panel bundle (index.js, index.css) IS committed:
+# a Composer install has no build step
+node_modules/
+.vite/
+
+# Composer / PHP
+/vendor/
+composer.lock
+composer.phar
+
+# Secrets — never commit them. /glue/ is where the dev site (dev/) reads
+# its .env from, one level above its web root, as the README describes.
+/glue/
+.env
+.env.*
+
+# Coverage / tests
+/coverage/
+.phpunit.cache/
+
+# IDE / editor / agent
+/.idea/
+/.vscode/
+*~
+.claude/
+.mcp.json
+CLAUDE.md
+VENDOR-STRATEGY.md
+README.pdf

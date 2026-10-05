@@ -1,0 +1,21 @@
+{
+  "name": "@ianhobbs/kirby-cloudflare-tools",
+  "version": "1.0.0",
+  "description": "Kirby CMS plugin — a Cloudflare control panel in the Panel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "kirbyup serve src/index.js",
+    "build": "kirbyup src/index.js",
+    "watch": "kirbyup src/index.js --watch"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "kirbyup": "^3.5.0"
+  },
+  "overrides": {
+    "vite": "^6.4.3"
+  }
+}

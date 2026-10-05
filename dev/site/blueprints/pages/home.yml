@@ -1,0 +1,6 @@
+title: Dev Home
+icon: home
+
+fields:
+  text:
+    type: textarea

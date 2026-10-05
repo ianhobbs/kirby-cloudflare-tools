@@ -1,0 +1,27 @@
+# Composer output
+/vendor/
+/kirby/
+composer.lock
+.phpunit.cache/
+/coverage/
+
+# installed by Composer from require-dev (kirby-helpers is a Kirby plugin)
+/site/plugins/kirby-helpers/
+
+# Private to your machine — never commit these.
+# content/ and media/ hold test pages; accounts/ holds hashed Panel
+# credentials; sessions/ and cache/ are runtime state.
+/content/
+/media/
+/site/accounts/
+/site/sessions/
+/site/cache/
+/site/config/.cloudflare-tools-license
+
+# Created by the suite on every run
+/tests/fixtures/cache/
+/tests/fixtures/media/
+/tests/fixtures/logs/
+/tests/fixtures/site/sessions/
+/tests/fixtures/site/config/
+/tests/fixtures/site/accounts/
