@@ -38,10 +38,13 @@ Cloudflare from the server.
 ## Installation
 
 ```bash
-composer require ianhobbs/kirby-cloudflare-tools
+composer require ianhobbs/kirby-cloudflare-tools:^1.0@beta
 ```
 
 Composer puts the plugin in `site/plugins/cloudflare-tools/`.
+
+While the plugin is in beta, the `@beta` flag is needed: Composer installs
+only stable releases by default. Once 1.0.0 is out, drop the flag.
 
 Without Composer, download the release archive from
 [GitHub](https://github.com/ianhobbs/kirby-cloudflare-tools/releases), unzip
