@@ -19,8 +19,9 @@ works on Cloudflare's **Free plan**.
   error rate, threats and top countries, from Cloudflare's analytics.
 - **Diagnostics** — checks the token, the zone, and that a purge really
   reaches the edge.
-- **CLI and Janitor** — `cloudflare:check`, `cloudflare:purge`, and
-  `cloudflare:api` for calling any API endpoint.
+- **CLI and Janitor** — `cloudflare-tools:check`,
+  `cloudflare-tools:purge`, and `cloudflare-tools:api` for calling any API
+  endpoint.
 - **An open PHP API** — `site()->cloudflare()` for your own templates, hooks
   and plugins, with room to add the parts of Cloudflare's API it doesn't
   cover yet.
@@ -32,23 +33,27 @@ Cloudflare from the server.
 ## Requirements
 
 - Kirby 5
-- PHP 8.3+ with cURL
+- PHP 8.3 or later, with cURL. 8.3 is the minimum: Composer refuses to
+  install the plugin on older versions.
 - A domain on Cloudflare (any plan)
 
 ## Installation
 
 ```bash
-composer require ianhobbs/kirby-cloudflare-tools:^1.0@beta
+composer require ianhobbs/kirby-cloudflare-tools
 ```
 
 Composer puts the plugin in `site/plugins/cloudflare-tools/`.
 
-While the plugin is in beta, the `@beta` flag is needed: Composer installs
-only stable releases by default. Once 1.0.0 is out, drop the flag.
-
 Without Composer, download the release archive from
 [GitHub](https://github.com/ianhobbs/kirby-cloudflare-tools/releases), unzip
 it, and rename the folder to `site/plugins/cloudflare-tools/`.
+
+Or add it as a Git submodule:
+
+```bash
+git submodule add https://github.com/ianhobbs/kirby-cloudflare-tools.git site/plugins/cloudflare-tools
+```
 
 ## Credentials
 
@@ -124,8 +129,6 @@ Load it with [kirby-helpers](https://github.com/johannschopplich/kirby-helpers)
 // match your layout.
 $secrets = dirname(__DIR__, 3) . '/secrets';
 
-// Dotenv throws on a missing file. Without this check, a missing .env would
-// stop the whole site loading, not just the Cloudflare panel.
 if (is_file($secrets . '/.env')) {
     \JohannSchopplich\Helpers\Env::load($secrets);
 }
@@ -270,25 +273,26 @@ domain; on the command line, set Kirby's `url` option so they do there too.
 With [Kirby CLI](https://github.com/getkirby/cli):
 
 ```bash
-vendor/bin/kirby cloudflare:check   # token, zone, and a purge of the probe file only
-vendor/bin/kirby cloudflare:purge   # Kirby's page cache, then the whole Cloudflare cache
-vendor/bin/kirby cloudflare:api GET 'zones/{zone}/settings/http3'
-vendor/bin/kirby cloudflare:api PATCH 'zones/{zone}/settings/http3' --body '{"value":"on"}'
-vendor/bin/kirby cloudflare:license [status|activate KEY|check|remove]
+vendor/bin/kirby cloudflare-tools:check   # token, zone, and a purge of the probe file only
+vendor/bin/kirby cloudflare-tools:purge   # Kirby's page cache, then the whole Cloudflare cache
+vendor/bin/kirby cloudflare-tools:api GET 'zones/{zone}/settings/http3'
+vendor/bin/kirby cloudflare-tools:api PATCH 'zones/{zone}/settings/http3' --body '{"value":"on"}'
+vendor/bin/kirby cloudflare-tools:license [status|activate KEY|check|remove]
 ```
 
-`cloudflare:api` fills in `{zone}` and `{account}` and prints Cloudflare's
+`cloudflare-tools:api` fills in `{zone}` and `{account}` and prints Cloudflare's
 JSON answer.
 
 With [Janitor](https://github.com/bnomei/kirby-janitor) installed,
-`cloudflare:check` and `cloudflare:purge` also work as Panel buttons:
+`cloudflare-tools:check` and `cloudflare-tools:purge` also work as Panel
+buttons:
 
 ```yaml
 # site/blueprints/site.yml
 fields:
   cloudflare:
     type: janitor
-    command: 'cloudflare:purge'
+    command: 'cloudflare-tools:purge'
     label: Purge Cloudflare
     icon: cloud
     confirm: Purge the whole Cloudflare cache?
@@ -296,7 +300,7 @@ fields:
     cooldown: 5000
   cloudflareCheck:
     type: janitor
-    command: 'cloudflare:check'
+    command: 'cloudflare-tools:check'
     label: Test Cloudflare
     icon: check
     progress: Testing…
@@ -418,7 +422,7 @@ and call it like the built-in ones: `site()->cloudflare()->emailRouting()->rules
 
 Planned for later releases, all available on the Free plan: WAF custom rules,
 redirect rules, cache rules, Turnstile widgets, Email Routing and Web
-Analytics. Until then, `request()` and `cloudflare:api` reach them.
+Analytics. Until then, `request()` and `cloudflare-tools:api` reach them.
 
 ## Troubleshooting
 
@@ -432,8 +436,8 @@ Analytics. Until then, `request()` and `cloudflare:api` reach them.
 | `rate limiting this account` | Too many purges in a minute. Wait and try again. |
 | Purge works but visitors still see old pages | Check the browser cache: Cloudflare can't clear what browsers kept. Look at your HTML's `Cache-Control` header. |
 
-**Diagnostics** (or `vendor/bin/kirby cloudflare:check`) runs through all of
-this in order, and only purges the probe file.
+**Diagnostics** (or `vendor/bin/kirby cloudflare-tools:check`) runs through
+all of this in order, and only purges the probe file.
 
 ## Development
 
@@ -469,7 +473,7 @@ works:
   CLOUDFLARE_TOOLS_LICENSE=your-licence-key
   ```
 
-- **On the command line**: `vendor/bin/kirby cloudflare:license activate KEY`.
+- **On the command line**: `vendor/bin/kirby cloudflare-tools:license activate KEY`.
   Set Kirby's `url` option first, so the plugin knows the site's address.
 
 Each public website uses one activation of your key. Local and staging sites
@@ -483,8 +487,8 @@ need none. Add other staging hosts to `licenseIgnore`:
 ```
 
 **Moving a site to a new domain:** remove the licence on the old one first
-(the same dialog, or `cloudflare:license remove`), then activate it on the
-new one. This frees the activation for reuse.
+(the same dialog, or `cloudflare-tools:license remove`), then activate it on
+the new one. This frees the activation for reuse.
 
 The plugin keeps what the licence server last said in
 `site/config/.cloudflare-tools-license`, next to Kirby's own `.license`. A
@@ -502,7 +506,7 @@ can't be reached, the last answer stands for 14 days. A missing or inactive
 licence never switches anything off.
 
 ```bash
-vendor/bin/kirby cloudflare:license            # status
-vendor/bin/kirby cloudflare:license check      # ask the licence server now
-vendor/bin/kirby cloudflare:license remove     # free this site's activation
+vendor/bin/kirby cloudflare-tools:license            # status
+vendor/bin/kirby cloudflare-tools:license check      # ask the licence server now
+vendor/bin/kirby cloudflare-tools:license remove     # free this site's activation
 ```

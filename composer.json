@@ -30,7 +30,7 @@
   },
   "suggest": {
     "johannschopplich/kirby-helpers": "Loads the API token and zone ID from a .env file kept outside the web root (Env::load + env())",
-    "bnomei/kirby-janitor": "Adds Panel buttons for the cloudflare:purge and cloudflare:check commands"
+    "bnomei/kirby-janitor": "Adds Panel buttons for the cloudflare-tools:purge and cloudflare-tools:check commands"
   },
   "conflict": {
     "getkirby/cms": "<5.0.0 || >=6.0.0"

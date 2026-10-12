@@ -9,7 +9,7 @@ it('registers the plugin with its version', function () {
     $plugin = App::plugin('ianhobbs/cloudflare-tools');
 
     expect($plugin)->not->toBeNull()
-        ->and($plugin->version())->toBe('1.0.0-beta.1');
+        ->and($plugin->version())->toBe('1.0.0');
 });
 
 it('follows Kirby\'s naming convention: kirby- prefix outside Kirby only', function () {
@@ -60,7 +60,7 @@ it('registers its API routes under cloudflare-tools/', function () {
 
 it('registers the CLI commands', function () {
     expect(kirby()->extensions('commands'))
-        ->toHaveKeys(['cloudflare:check', 'cloudflare:purge', 'cloudflare:api']);
+        ->toHaveKeys(['cloudflare-tools:check', 'cloudflare-tools:purge', 'cloudflare-tools:api', 'cloudflare-tools:license']);
 });
 
 it('registers role permissions with safe defaults', function () {

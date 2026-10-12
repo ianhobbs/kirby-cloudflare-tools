@@ -33,9 +33,9 @@
 
     <k-section label="From the command line">
       <div class="cf-card">
-        <pre class="cf-mono">vendor/bin/kirby cloudflare:check
-vendor/bin/kirby cloudflare:purge
-vendor/bin/kirby cloudflare:api GET 'zones/{zone}/settings'</pre>
+        <pre class="cf-mono">vendor/bin/kirby cloudflare-tools:check
+vendor/bin/kirby cloudflare-tools:purge
+vendor/bin/kirby cloudflare-tools:api GET 'zones/{zone}/settings'</pre>
         <p class="cf-muted">
           The same checks as above, a full purge (Kirby's page cache first),
           and any Cloudflare API call for trying out features this panel

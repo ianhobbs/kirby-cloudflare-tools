@@ -3,12 +3,12 @@
 /**
  * Kirby CLI commands, also usable as Janitor buttons (bnomei/kirby-janitor):
  *
- *   vendor/bin/kirby cloudflare:check        token, zone, and a purge of the probe file only
- *   vendor/bin/kirby cloudflare:purge        Kirby's page cache, then the whole Cloudflare zone
- *   vendor/bin/kirby cloudflare:api GET 'zones/{zone}/settings/http3'
- *                                            any API call, for trying out a gate
- *   vendor/bin/kirby cloudflare:license [status|activate KEY|check|remove]
- *                                            this site's licence
+ *   vendor/bin/kirby cloudflare-tools:check        token, zone, and a purge of the probe file only
+ *   vendor/bin/kirby cloudflare-tools:purge        Kirby's page cache, then the whole Cloudflare zone
+ *   vendor/bin/kirby cloudflare-tools:api GET 'zones/{zone}/settings/http3'
+ *                                                  any API call, for trying out a gate
+ *   vendor/bin/kirby cloudflare-tools:license [status|activate KEY|check|remove]
+ *                                                  this site's licence
  */
 
 use Bnomei\Janitor;
@@ -48,7 +48,7 @@ $report = static function (CLI $cli, Diagnostics $diagnostics, string $passed, s
 };
 
 return [
-    'cloudflare:license' => [
+    'cloudflare-tools:license' => [
         'description' => 'Show, activate, re-check or remove this site\'s Cloudflare Tools licence',
         'args'        => [
             'action' => [
@@ -89,21 +89,21 @@ return [
             in_array($info['status'], ['active', 'demo'], true) ? $cli->success($line) : $cli->out($line);
         },
     ],
-    'cloudflare:check' => [
+    'cloudflare-tools:check' => [
         'description' => 'Test the Cloudflare token and zone, purging only the probe file',
         'args'        => [] + $janitorArgs,
         'command'     => static function (CLI $cli) use ($report): void {
             $report($cli, Diagnostics::fromOptions()->check(), 'Cloudflare token and zone work', 'Cloudflare test failed');
         },
     ],
-    'cloudflare:purge' => [
+    'cloudflare-tools:purge' => [
         'description' => 'Flush the Kirby pages cache, then purge the whole Cloudflare zone',
         'args'        => [] + $janitorArgs,
         'command'     => static function (CLI $cli) use ($report): void {
             $report($cli, Diagnostics::fromOptions()->purgeAll(), 'Kirby + Cloudflare cache purged', 'Purge failed, see the report above');
         },
     ],
-    'cloudflare:api' => [
+    'cloudflare-tools:api' => [
         'description' => 'Call any Cloudflare API path; {zone} and {account} are filled in',
         'args'        => [
             'method' => [

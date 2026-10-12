@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0 — 2026-10-12
+
+First stable release. The licence agreement is final.
+
+- **Breaking:** the CLI commands are renamed from `cloudflare:*` to
+  `cloudflare-tools:*` (`check`, `purge`, `api`, `license`), matching the
+  plugin's other names. Update Janitor buttons in your blueprints, e.g.
+  `command: 'cloudflare-tools:purge'`.
+- `LICENSE`: the draft notice is removed.
+- README: the install command no longer needs `@beta`; Git submodule
+  install added; PHP 8.3 stated as the minimum version.
+
 ## 1.0.0-beta.1 — 2026-10-05
 
 First pre-release. The licence agreement is still in draft, and licence

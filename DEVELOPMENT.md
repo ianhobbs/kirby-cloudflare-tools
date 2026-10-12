@@ -39,7 +39,8 @@ kirby-cloudflare-tools/
 
 ## Names
 
-Following Kirby's [publishing guide](https://getkirby.com/docs/guide/plugins/publishing),
+Following Kirby's [publishing](https://getkirby.com/docs/guide/plugins/publishing)
+and [packaging](https://getkirby.com/docs/guide/plugins/packaging) guides,
 the plugin has three names on purpose. The `kirby-` prefix helps on GitHub,
 Packagist and Polar, where the plugin sits among packages for every
 framework; inside Kirby it would only be noise.
@@ -53,6 +54,8 @@ framework; inside Kirby it would only be noise.
 | Install folder (`extra.installer-name`) | `site/plugins/cloudflare-tools` |
 | Options | `ianhobbs.cloudflare-tools.*` |
 | Panel area, API routes, dialogs | `cloudflare-tools`, `/api/cloudflare-tools/…` |
+| CLI commands | `cloudflare-tools:check`, `:purge`, `:api`, `:license` |
+| Page view button | `cloudflare-purge` |
 | Plugin assets | `/media/plugins/ianhobbs/cloudflare-tools/…` |
 | PHP namespace | `IanHobbs\CloudflareTools` |
 
@@ -171,7 +174,7 @@ These are the API calls and patterns they used, and where each lives now.
 | `cf-cache-status` / `Age` headers on a probe file, before and after a purge | `Diagnostics::warmProbe()` / `checkProbe()` |
 | Kirby pages cache flushed before purging everything | `Diagnostics::purgeAll()`, `flushKirby` option |
 | Error code hints (1000, 6003, 6111, 7000, 7003, 10000) | `ApiException::HINTS`, plus IP-filter and 429 hints |
-| `cloudflare:check`, `cloudflare:purge` commands with `Janitor::ARGS` | `config/commands.php` (Janitor optional) |
+| `cloudflare:check`, `cloudflare:purge` commands with `Janitor::ARGS` | `cloudflare-tools:check`, `cloudflare-tools:purge` in `config/commands.php` (Janitor optional) |
 | Token + zone in `glue/.env`, loaded by kirby-helpers' `Env::load()` | Same pattern, documented generically in the README |
 
 **klub/cloudflare** (traffic for members, per-member domain):
@@ -201,7 +204,7 @@ dev site, kirbyup, `export-ignore`, and the release checklist below.
 
    ```bash
    cd dev
-   vendor/bin/kirby cloudflare:api GET 'zones/{zone}/email/routing'
+   vendor/bin/kirby cloudflare-tools:api GET 'zones/{zone}/email/routing'
    ```
 
 3. Add `classes/Api/YourGate.php` extending `Endpoint`. Use
@@ -248,7 +251,7 @@ terms are in `LICENSE`. In the code:
 - `config/areas.php` has the admin-only `cloudflare-tools.license` dialog that
   the System view's status opens. `config/api.php`'s `status` route runs the
   daily `refresh()`; it is the only place a check happens on its own.
-- `config/commands.php` has `cloudflare:license`.
+- `config/commands.php` has `cloudflare-tools:license`.
 
 **Switching checks on:** set `Polar::ORGANIZATION` to the organisation ID
 from Polar (Settings › General). Until then every key is saved and shown as
@@ -293,9 +296,18 @@ VENDOR-STRATEGY.md (kept outside the repository).
 
 6. Check what ships: `git archive --format=tar vx.y.z | tar -t` lists no
    `dev/` or `src/`.
+7. Create a GitHub Release from the tag, so the README's download link has
+   an archive to offer. Mark betas as pre-releases:
+
+   ```bash
+   gh release create vx.y.z --verify-tag --title "vx.y.z" --notes "…"   # add --prerelease for betas
+   ```
 
 Don't add a `"version"` field to `composer.json`; Packagist reads versions
-from tags. Submit the package to Packagist once, after the first tag.
+from tags. ZIP and submodule installs get the version from
+`Kirby::plugin(version: …)` in `index.php`, which takes precedence over
+composer.json (see the packaging guide). Submit the package to Packagist
+once, after the first tag.
 
 ## Kirby 6
 
