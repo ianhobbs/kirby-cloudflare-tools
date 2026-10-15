@@ -18,9 +18,9 @@ use Throwable;
  */
 final class Polar implements Provider
 {
-    // Polar › Settings › General › Organization ID, once the product exists.
-    // Until then every key is saved but reported as not verified.
-    public const ORGANIZATION = null;
+    // Polar › Settings › General › Organization ID (a UUID, not the slug).
+    // Set to null to save keys without checking them.
+    public const ORGANIZATION = '3ad086a5-d4ea-4352-a21d-143e0349e649';
 
     public const ENDPOINT = 'https://api.polar.sh';
     public const SANDBOX  = 'https://sandbox-api.polar.sh';

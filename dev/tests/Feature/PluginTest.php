@@ -9,7 +9,7 @@ it('registers the plugin with its version', function () {
     $plugin = App::plugin('ianhobbs/cloudflare-tools');
 
     expect($plugin)->not->toBeNull()
-        ->and($plugin->version())->toBe('1.0.0');
+        ->and($plugin->version())->toBe('1.0.1');
 });
 
 it('follows Kirby\'s naming convention: kirby- prefix outside Kirby only', function () {

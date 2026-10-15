@@ -39,7 +39,7 @@ if (class_exists(Cloudflare::class) === false) {
 
 Kirby::plugin(
     name: 'ianhobbs/cloudflare-tools',
-    version: '1.0.0',
+    version: '1.0.1',
     // Shown in the Panel's System view, with a status that opens the
     // activation dialog. Read from the stored state: no network call.
     license: fn (Plugin $plugin) => LicenseManager::fromOptions()->toPanel($plugin),
@@ -102,8 +102,8 @@ Kirby::plugin(
             'license'       => fn () => Options::env('CLOUDFLARE_TOOLS_LICENSE'),
             // more development hosts that need no licence, e.g. ['staging.*']
             'licenseIgnore' => [],
-            // where the "Cloudflare Tools Licence" name links to
-            'licenseShop'   => null,
+            // where the "Cloudflare Tools Licence" name and "Buy a licence" link to
+            'licenseShop'   => 'https://codey.net.au/apps/cloudflare-tools',
             // the vendor's own testing: ['organization' => '…', 'endpoint' => Licensing\Polar::SANDBOX]
             'licenseServer' => [],
         ],

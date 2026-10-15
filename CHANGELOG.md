@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.1 — 2026-10-15
+
+- Licence checks are switched on: keys are activated and checked against
+  the Cloudflare Tools store on Polar. A key saved while checks were off is
+  activated the next time someone opens the Cloudflare area. As before, a
+  missing or inactive licence never switches anything off.
+- The licence dialog and Panel › System link to the shop at
+  https://codey.net.au/apps/cloudflare-tools, as does the README.
+
 ## 1.0.0 — 2026-10-12
 
 First stable release. The licence agreement is final.

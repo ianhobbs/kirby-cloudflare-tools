@@ -451,7 +451,8 @@ like Kirby itself:
 - **Free** on development and staging sites (local computers, private
   networks, password-protected staging), for as long as you like.
 - **One paid licence activation per public website.** Licences come in tiers
-  by number of sites.
+  by number of sites: buy one at
+  [codey.net.au/apps/cloudflare-tools](https://codey.net.au/apps/cloudflare-tools).
 - You may change the code for your own sites, but not redistribute or
   resell it.
 
