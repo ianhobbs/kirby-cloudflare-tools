@@ -1,5 +1,10 @@
 # Cloudflare Tools for Kirby
 
+[![Kirby 5](https://img.shields.io/badge/Kirby-5-000000)](#requirements)
+[![Kirby 4.3+ lite edition](https://img.shields.io/badge/Kirby-4.3%2B_lite-555555)](#on-kirby-4-the-lite-edition)
+[![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](#requirements)
+[![Cloudflare: any plan, including Free](https://img.shields.io/badge/Cloudflare-any_plan,_incl._Free-f38020)](#what-it-covers)
+
 **For Kirby 5, and Kirby 4.3+ as a lite edition** · PHP 8.1+ · any Cloudflare plan, including Free
 
 A Cloudflare control panel inside the Kirby Panel. Editors purge the cache,
