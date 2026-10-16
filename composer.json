@@ -15,6 +15,7 @@
     "kirby",
     "kirby-cms",
     "kirby-plugin",
+    "kirby4",
     "kirby5",
     "cloudflare",
     "cdn",
@@ -23,7 +24,7 @@
     "panel"
   ],
   "require": {
-    "php": ">=8.3",
+    "php": ">=8.2",
     "ext-curl": "*",
     "ext-json": "*",
     "getkirby/composer-installer": "^1.2"
@@ -33,7 +34,7 @@
     "bnomei/kirby-janitor": "Adds Panel buttons for the cloudflare-tools:purge and cloudflare-tools:check commands"
   },
   "conflict": {
-    "getkirby/cms": "<5.0.0 || >=6.0.0"
+    "getkirby/cms": "<4.9.6 || >=6.0.0"
   },
   "autoload": {
     "psr-4": {
@@ -43,7 +44,7 @@
   "extra": {
     "installer-name": "cloudflare-tools",
     "kirby": {
-      "compatible": "^5.0"
+      "compatible": "^4.9.6 || ^5.0"
     }
   },
   "config": {

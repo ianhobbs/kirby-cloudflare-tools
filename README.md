@@ -1,6 +1,11 @@
 # Cloudflare Tools for Kirby
 
-**For Kirby 5** · PHP 8.3+ · any Cloudflare plan, including Free
+[![Kirby 5](https://img.shields.io/badge/Kirby-5-000000)](#requirements)
+[![Kirby 4.9.6+ lite edition](https://img.shields.io/badge/Kirby-4.9.6%2B_lite-555555)](#on-kirby-4-the-lite-edition)
+[![PHP 8.2+](https://img.shields.io/badge/PHP-8.2%2B-777bb4)](#requirements)
+[![Cloudflare: any plan, including Free](https://img.shields.io/badge/Cloudflare-any_plan,_incl._Free-f38020)](#what-it-covers)
+
+**For Kirby 5, and Kirby 4.9.6+ as a lite edition** · PHP 8.2+ · any Cloudflare plan, including Free
 
 A Cloudflare control panel inside the Kirby Panel. Editors purge the cache,
 switch Development Mode or "I'm Under Attack", and read their traffic;
@@ -30,11 +35,29 @@ The API token never reaches the browser. The Panel talks to the plugin's own
 API routes, which need a logged-in Panel user, and the plugin talks to
 Cloudflare from the server.
 
+### On Kirby 4: the lite edition
+
+On Kirby 4.9.6 and later, the plugin runs a smaller, free edition that covers
+what editors need while they work on the site. The Cloudflare area has one
+page with:
+
+- the **Development Mode** switch, which bypasses Cloudflare's cache for
+  three hours so changes show straight away
+- **Purge everything**
+- the **traffic** charts
+
+Purge-on-save, the CLI commands and the PHP API work as on Kirby 5. The other
+tabs, the page Purge button and the zone-wide switches (I'm Under Attack,
+pause) are Kirby 5 only. Kirby 4 sites need no licence.
+
 ## Requirements
 
-- Kirby 5
-- PHP 8.3 or later, with cURL. 8.3 is the minimum: Composer refuses to
-  install the plugin on older versions.
+- Kirby 5, or Kirby 4.9.6 or later for the [lite edition](#on-kirby-4-the-lite-edition).
+  Every older Kirby 4 release has known security advisories (in Kirby or a
+  package it pins), so update Kirby first (`composer update getkirby/cms`). Kirby 6 is not supported
+  yet; on Kirby 6 (and before 4.9.6) the plugin switches itself off and logs
+  why, instead of breaking the site.
+- PHP 8.2 or later, with cURL.
 - A domain on Cloudflare (any plan)
 
 ## Installation
@@ -220,7 +243,8 @@ Other roles get these defaults:
 |---|---|---|
 | `analytics` | yes | Traffic charts |
 | `purge` | yes | Purging, the page Purge button, Diagnostics |
-| `settings` | no | Zone settings, Development Mode, Tiered Cache, pause |
+| `developmentMode` | yes | The Development Mode switch on the Overview tab |
+| `settings` | no | Zone settings (Development Mode included, on the Caching tab), Tiered Cache, pause |
 | `security` | no | Security settings, I'm Under Attack, bots, IP Access Rules |
 | `dns` | no | Changing DNS records (when DNS writes are allowed) |
 
@@ -236,6 +260,7 @@ permissions:
     cloudflare-tools: true   # false hides the Cloudflare area entirely
   ianhobbs.cloudflare-tools:
     purge: true
+    developmentMode: true
     settings: true
     security: false
 ```
@@ -450,6 +475,8 @@ like Kirby itself:
 
 - **Free** on development and staging sites (local computers, private
   networks, password-protected staging), for as long as you like.
+- **Free on Kirby 4**: the [lite edition](#on-kirby-4-the-lite-edition)
+  needs no licence.
 - **One paid licence activation per public website.** Licences come in tiers
   by number of sites: buy one at
   [codey.net.au/apps/cloudflare-tools](https://codey.net.au/apps/cloudflare-tools).

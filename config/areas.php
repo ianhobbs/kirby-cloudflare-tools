@@ -4,9 +4,13 @@
  * The Cloudflare area in the Panel menu, the "Purge" view button for pages,
  * and the licence dialog that the System view's licence status opens. The
  * area's data loads through the API routes (config/api.php).
+ *
+ * The Kirby 4 edition keeps the area and leaves out the dialogs and the
+ * button: it has no licence, and Kirby 4 has no view buttons.
  */
 
 use IanHobbs\CloudflareTools\Cloudflare;
+use IanHobbs\CloudflareTools\Compat;
 use IanHobbs\CloudflareTools\Licensing\LicenseManager;
 use IanHobbs\CloudflareTools\Options;
 use IanHobbs\CloudflareTools\Panel\Guard;
@@ -22,7 +26,7 @@ return [
     Guard::AREA => function () {
         $label = Options::get('panel.label', 'Cloudflare');
 
-        return [
+        $area = [
             'label' => $label,
             'icon'  => Options::get('panel.icon', 'cloud'),
             'menu'  => Options::get('panel.menu', true),
@@ -160,7 +164,7 @@ return [
                             return match ($info['status']) {
                                 'active'   => ['message' => 'Licence active for ' . $info['website']],
                                 'unknown'  => ['message' => 'Licence key saved. ' . $info['message']],
-                                default    => throw new Exception(message: $info['message'], translate: false),
+                                default    => throw Compat::exception(Exception::class, $info['message']),
                             };
                         });
                     },
@@ -221,5 +225,7 @@ return [
                 },
             ],
         ];
+
+        return Compat::lite() ? array_diff_key($area, ['dialogs' => true, 'buttons' => true]) : $area;
     },
 ];

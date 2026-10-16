@@ -1,0 +1,75 @@
+name: Tests
+
+# The plugin runs on two Kirby versions from one codebase: Kirby 4.9.6+ (the
+# lite edition) and Kirby 5. Each cell installs one Kirby into dev/ and runs
+# the Pest suite against the plugin in the repository root.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    name: Kirby ${{ matrix.kirby }} · PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # lowest supported Kirby 4 and PHP, then the newest Kirby 4 and
+          # the newest PHP it supports
+          - { kirby: '4.9.6', php: '8.2' }
+          - { kirby: '^4.9.6', php: '8.4' }
+          - { kirby: '^5.0', php: '8.2' }
+          - { kirby: '^5.0', php: '8.5' }
+    defaults:
+      run:
+        working-directory: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, mbstring, zip
+          coverage: none
+
+      # --with pins Kirby for this run only, within dev/composer.json's range
+      - name: Install Kirby ${{ matrix.kirby }}
+        run: composer update --no-interaction --no-progress --prefer-dist -W --with "getkirby/cms:${{ matrix.kirby }}"
+
+      - name: Run the suite
+        run: composer test
+
+  kirby6:
+    # Kirby 6 needs plugin 2.0; until then 1.x must switch itself off there
+    # instead of failing. Not blocking: the beta's dependencies may not
+    # resolve with the dev tools yet.
+    name: Kirby 6 beta · plugin switches itself off
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, mbstring, zip
+          coverage: none
+
+      # outside dev/composer.json's range, so `require` (on this runner only)
+      - name: Install the Kirby 6 beta
+        run: composer require --dev --no-interaction --no-progress --prefer-dist -W "getkirby/cms:^6.0@beta"
+
+      - name: Load the plugin
+        run: |
+          php -r '
+            require "kirby/bootstrap.php";
+            require "../index.php";
+            $plugin = Kirby\Cms\App::plugin("ianhobbs/cloudflare-tools");
+            echo $plugin === null ? "switched off, as expected\n" : "registered on Kirby 6\n";
+            exit($plugin === null ? 0 : 1);
+          '

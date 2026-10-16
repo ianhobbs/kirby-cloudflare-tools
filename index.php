@@ -15,6 +15,7 @@
  */
 
 use IanHobbs\CloudflareTools\Cloudflare;
+use IanHobbs\CloudflareTools\Compat;
 use IanHobbs\CloudflareTools\Licensing\LicenseManager;
 use IanHobbs\CloudflareTools\Options;
 use IanHobbs\CloudflareTools\Panel\Guard;
@@ -37,13 +38,24 @@ if (class_exists(Cloudflare::class) === false) {
     });
 }
 
-Kirby::plugin(
-    name: 'ianhobbs/cloudflare-tools',
-    version: '1.0.1',
-    // Shown in the Panel's System view, with a status that opens the
-    // activation dialog. Read from the stored state: no network call.
-    license: fn (Plugin $plugin) => LicenseManager::fromOptions()->toPanel($plugin),
-    extends: [
+// Kirby before 4.9.6, or Kirby 6 and later: switch off instead of taking the
+// site down. Composer installs are stopped earlier, by the `conflict` rule.
+if (Compat::supported() === false) {
+    error_log('[' . Options::PREFIX . '] needs Kirby ' . Compat::MINIMUM . ' or later 4.x, or Kirby 5; this is Kirby ' . Compat::version() . ', so the plugin is switched off');
+    return;
+}
+
+// Kirby 5 shows the licence in the Panel's System view, with a status that
+// opens the activation dialog; read from the stored state, no network call.
+// Kirby 4 has no plugin licences, and its sites need none.
+$license = Compat::lite() ? [] : [
+    'license' => fn (Plugin $plugin) => LicenseManager::fromOptions()->toPanel($plugin),
+];
+
+Kirby::plugin(...[
+    'name'    => 'ianhobbs/cloudflare-tools',
+    'version' => '1.1.0',
+    'extends' => [
         'options' => [
             // ── Credentials ─────────────────────────────────────────────────
             // Read from the environment by default, so a site that loads a
@@ -128,5 +140,5 @@ Kirby::plugin(
              */
             'cloudflare' => fn (array $config = []) => Cloudflare::fromOptions($config),
         ],
-    ]
-);
+    ],
+] + $license);

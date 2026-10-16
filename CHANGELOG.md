@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.1.0 — unreleased
+
+- **Kirby 4 support, as a free lite edition.** On Kirby 4.9.6 and later the
+  Cloudflare area has one page: the Development Mode switch, Purge
+  everything and the traffic charts. Purge-on-save, the CLI commands and
+  `site()->cloudflare()` work as on Kirby 5. Kirby 4 sites need no licence:
+  there is no licence status or dialog, and `cloudflare-tools:license` says
+  so. Only the API routes the Overview page uses are registered.
+- New `developmentMode` role permission, **on by default**: editors can now
+  switch Development Mode from the Overview tab without the `settings`
+  permission. Set it to `false` in a role's blueprint to keep the old
+  behaviour. The Caching tab's toggle still needs `settings`.
+- New Panel API route `POST /api/cloudflare-tools/development-mode`
+  (`{"enabled": true}`), which the Overview switch now uses.
+- PHP 8.2 or later (was 8.3).
+- Kirby 6 is not supported by 1.x; it will be plugin 2.0. Composer now
+  refuses Kirby 6, and Kirby 4 before 4.9.6: every older Kirby 4 release has
+  known security advisories, in Kirby or a package it pins. Without Composer (ZIP or submodule),
+  the plugin switches itself off on those versions and logs why, instead of
+  breaking the site.
+- The tab bar is hidden when the area has only one tab.
+- Tests run in CI on Kirby 4.9.6, the newest Kirby 4 and Kirby 5, PHP 8.2 to 8.5.
+
 ## 1.0.1 — 2026-10-15
 
 - Licence checks are switched on: keys are activated and checked against

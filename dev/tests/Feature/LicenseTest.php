@@ -216,7 +216,7 @@ it('shows the System view status without calling the seller', function () {
 
     expect($license->status()->value())->toBe('missing')
         ->and($fake->requests)->toBe([]);
-});
+})->skip(lite(), 'Kirby 4 has no plugin licences');
 
 it('activates from the licence dialog, for admins', function () {
     $fake = polar(new FakeCloudflare());
@@ -234,7 +234,7 @@ it('activates from the licence dialog, for admins', function () {
     expect($dialog['load']()['props']['fields'])->toHaveKeys(['info', 'key'])
         ->and($dialog['submit']()['message'])->toBe('Licence active for example.com')
         ->and($fake->last()['body']['label'])->toBe('example.com');
-});
+})->skip(lite(), 'Kirby 4 sites need no licence');
 
 it('keeps non-admins out of the licence dialog', function () {
     fake();
@@ -242,7 +242,7 @@ it('keeps non-admins out of the licence dialog', function () {
     kirby()->impersonate('editor@example.com');
 
     kirby()->extensions('areas')['cloudflare-tools'][0](kirby())['dialogs']['cloudflare-tools.license']['load']();
-})->throws(PermissionException::class, 'Only admins');
+})->throws(PermissionException::class, 'Only admins')->skip(lite(), 'Kirby 4 sites need no licence');
 
 it('adds the licence to the Panel status, without the key', function () {
     polar(fake(['licenseServer' => ['organization' => ORG], 'license' => KEY]));
@@ -251,4 +251,15 @@ it('adds the licence to the Panel status, without the key', function () {
 
     expect($status['license'])->toMatchArray(['status' => 'active', 'source' => 'config', 'manage' => true])
         ->and(json_encode($status))->not->toContain(KEY);
-});
+})->skip(lite(), 'Kirby 4 sites need no licence');
+
+it('leaves the licence out of the Panel status on Kirby 4, and never calls the seller', function () {
+    $fake = fake(['licenseServer' => ['organization' => ORG], 'license' => KEY])
+        ->on('GET', 'zones/{zone}', ['result' => ['name' => 'example.com']]);
+
+    $status = api('cloudflare-tools/status');
+
+    expect($status['edition'])->toBe('lite')
+        ->and($status['license'])->toBeNull()
+        ->and(array_filter($fake->requests, fn ($request) => str_contains($request['url'], 'polar')))->toBe([]);
+})->skip(lite() === false, 'Kirby 4 only');
