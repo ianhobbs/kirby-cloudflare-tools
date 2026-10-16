@@ -25,7 +25,8 @@
       </template>
     </k-header>
 
-    <k-tabs :tab="tab" :tabs="tabButtons" />
+    <!-- one tab (the Kirby 4 edition, or all others hidden) needs no tab bar -->
+    <k-tabs v-if="tabButtons.length > 1" :tab="tab" :tabs="tabButtons" />
 
     <k-box v-if="error" theme="negative" icon="alert" :text="error" />
 

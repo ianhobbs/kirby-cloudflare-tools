@@ -2,6 +2,7 @@
 
 namespace IanHobbs\CloudflareTools\Panel;
 
+use IanHobbs\CloudflareTools\Compat;
 use IanHobbs\CloudflareTools\Options;
 
 /**
@@ -23,6 +24,11 @@ final class View
     /** @return array<string, array{label: string, icon: string}> */
     public static function tabs(): array
     {
+        // the Kirby 4 edition: Development Mode, Purge everything, traffic
+        if (Compat::lite() === true) {
+            return array_intersect_key(self::TABS, ['overview' => true]);
+        }
+
         $hidden = (array)Options::get('panel.hide', []);
 
         if (in_array(Options::get('dns', 'read'), ['read', 'write'], true) === false) {

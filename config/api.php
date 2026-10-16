@@ -6,11 +6,14 @@
  * Kirby's API already requires a logged-in Panel user and a CSRF token for
  * every write. Each route then checks the plugin permission it needs (see
  * Guard) and calls Cloudflare server-side: the token never reaches the browser.
+ *
+ * On Kirby 4 (the lite edition) only Compat::LITE_ROUTES are registered.
  */
 
 use IanHobbs\CloudflareTools\Api\Analytics;
 use IanHobbs\CloudflareTools\Api\Settings;
 use IanHobbs\CloudflareTools\Cloudflare;
+use IanHobbs\CloudflareTools\Compat;
 use IanHobbs\CloudflareTools\Diagnostics;
 use IanHobbs\CloudflareTools\Licensing\LicenseManager;
 use IanHobbs\CloudflareTools\Options;
@@ -37,25 +40,39 @@ $settingsPermission = fn (string $group): string => $group === 'security' ? 'sec
 
 $dnsMode = fn (): string => in_array(Options::get('dns', 'read'), ['read', 'write'], true) ? Options::get('dns', 'read') : 'off';
 
-return [
+// the Kirby 4 edition registers only the routes its Overview tab uses
+$lite = fn (array $routes): array => array_values(array_filter(
+    $routes,
+    fn (array $route): bool => in_array($route['pattern'], Compat::LITE_ROUTES, true)
+));
+
+$routes = [
     [
         'pattern' => 'cloudflare-tools/status',
         'method'  => 'GET',
         'action'  => function () use ($cloudflare, $attempt, $dnsMode) {
             return Guard::run(null, function () use ($cloudflare, $attempt, $dnsMode) {
-                $cf     = $cloudflare();
-                // the once-a-day licence check happens here, in the Panel,
-                // never on a visitor's request; it never throws
-                $license = LicenseManager::fromOptions();
+                $cf      = $cloudflare();
+                $license = null;
 
-                try {
-                    $license->refresh();
-                } catch (Throwable) {
-                    // an unwritable site/config must not take the panel down
+                // Kirby 4 sites need no licence
+                if (Compat::lite() === false) {
+                    // the once-a-day licence check happens here, in the Panel,
+                    // never on a visitor's request; it never throws
+                    $manager = LicenseManager::fromOptions();
+
+                    try {
+                        $manager->refresh();
+                    } catch (Throwable) {
+                        // an unwritable site/config must not take the panel down
+                    }
+
+                    $license = $manager->info() + ['manage' => kirby()->user()?->isAdmin() === true];
                 }
 
                 $status = [
-                    'license'     => $license->info() + ['manage' => kirby()->user()?->isAdmin() === true],
+                    'edition'     => Compat::lite() ? 'lite' : 'full',
+                    'license'     => $license,
                     'configured'  => $cf->isConfigured(),
                     'missing'     => $cf->missing(),
                     'permissions' => Guard::all(),
@@ -166,7 +183,7 @@ return [
                 // only settings of this group, so the permission check holds
                 foreach (array_keys($changes) as $id) {
                     if ((Settings::CATALOGUE[$id]['group'] ?? null) !== $group) {
-                        throw new InvalidArgumentException(message: 'The setting "' . $id . '" is not part of ' . $group);
+                        throw Compat::exception(InvalidArgumentException::class, 'The setting "' . $id . '" is not part of ' . $group);
                     }
                 }
 
@@ -191,6 +208,23 @@ return [
                 }
 
                 return $result;
+            });
+        },
+    ],
+    [
+        // its own permission, so editors can bypass the cache while they
+        // work without being allowed to change the zone's other settings
+        'pattern' => 'cloudflare-tools/development-mode',
+        'method'  => 'POST',
+        'action'  => function () use ($cloudflare) {
+            return Guard::run('developmentMode', function () use ($cloudflare) {
+                $on    = (bool)$this->requestBody('enabled', false);
+                $value = $cloudflare()->settings()->set('development_mode', Settings::fromPanel('development_mode', $on));
+
+                return [
+                    'developmentMode' => Settings::toPanel('development_mode', $value),
+                    'message'         => $on ? 'Development Mode is on for three hours' : 'Development Mode is off',
+                ];
             });
         },
     ],
@@ -254,7 +288,7 @@ return [
                     $value = (string)$this->requestBody('ai_bots_protection');
 
                     if (in_array($value, ['block', 'disabled', 'only_on_ad_pages'], true) === false) {
-                        throw new InvalidArgumentException(message: 'Unknown AI bot setting "' . $value . '"');
+                        throw Compat::exception(InvalidArgumentException::class, 'Unknown AI bot setting "' . $value . '"');
                     }
 
                     $changes['ai_bots_protection'] = $value;
@@ -314,7 +348,7 @@ return [
         'action'  => function () use ($cloudflare, $dnsMode) {
             return Guard::run(null, function () use ($cloudflare, $dnsMode) {
                 if ($dnsMode() === 'off') {
-                    throw new PermissionException(message: 'DNS is switched off for this site (option `dns`)');
+                    throw Compat::exception(PermissionException::class, 'DNS is switched off for this site (option `dns`)');
                 }
 
                 return [
@@ -331,7 +365,7 @@ return [
         'action'  => function () use ($cloudflare, $dnsMode) {
             return Guard::run('dns', function () use ($cloudflare, $dnsMode) {
                 if ($dnsMode() !== 'write') {
-                    throw new PermissionException(message: 'DNS is read-only for this site: set the `dns` option to "write"');
+                    throw Compat::exception(PermissionException::class, 'DNS is read-only for this site: set the `dns` option to "write"');
                 }
 
                 return $cloudflare()->dns()->create((array)$this->requestBody());
@@ -344,7 +378,7 @@ return [
         'action'  => function (string $id) use ($cloudflare, $dnsMode) {
             return Guard::run('dns', function () use ($id, $cloudflare, $dnsMode) {
                 if ($dnsMode() !== 'write') {
-                    throw new PermissionException(message: 'DNS is read-only for this site: set the `dns` option to "write"');
+                    throw Compat::exception(PermissionException::class, 'DNS is read-only for this site: set the `dns` option to "write"');
                 }
 
                 return $cloudflare()->dns()->update($id, (array)$this->requestBody());
@@ -357,7 +391,7 @@ return [
         'action'  => function (string $id) use ($cloudflare, $dnsMode) {
             return Guard::run('dns', function () use ($id, $cloudflare, $dnsMode) {
                 if ($dnsMode() !== 'write') {
-                    throw new PermissionException(message: 'DNS is read-only for this site: set the `dns` option to "write"');
+                    throw Compat::exception(PermissionException::class, 'DNS is read-only for this site: set the `dns` option to "write"');
                 }
 
                 $cloudflare()->dns()->delete($id);
@@ -377,3 +411,5 @@ return [
         },
     ],
 ];
+
+return Compat::lite() ? $lite($routes) : $routes;

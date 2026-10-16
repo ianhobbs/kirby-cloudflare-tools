@@ -4,6 +4,7 @@ namespace IanHobbs\CloudflareTools\Panel;
 
 use Closure;
 use IanHobbs\CloudflareTools\ApiException;
+use IanHobbs\CloudflareTools\Compat;
 use IanHobbs\CloudflareTools\Options;
 use Kirby\Cms\App;
 use Kirby\Cms\User;
@@ -24,6 +25,7 @@ use Throwable;
  *       cloudflare-tools: true          # see the area at all
  *     ianhobbs.cloudflare-tools:
  *       purge: true
+ *       developmentMode: true
  *       settings: false
  *
  * Admins may always do everything.
@@ -34,11 +36,13 @@ final class Guard
 
     /** Defaults for roles that don't say; registered as the plugin's permissions */
     public const PERMISSIONS = [
-        'analytics' => true,
-        'purge'     => true,
-        'settings'  => false,
-        'security'  => false,
-        'dns'       => false,
+        'analytics'       => true,
+        'purge'           => true,
+        // switching Cloudflare's cache off for three hours while editing
+        'developmentMode' => true,
+        'settings'        => false,
+        'security'        => false,
+        'dns'             => false,
     ];
 
     public static function can(string $action, User|null $user = null): bool
@@ -68,14 +72,14 @@ final class Guard
     public static function requireAdmin(): void
     {
         if (App::instance()->user()?->isAdmin() !== true) {
-            throw new PermissionException(message: 'Only admins can manage the Cloudflare Tools licence');
+            throw Compat::exception(PermissionException::class, 'Only admins can manage the Cloudflare Tools licence');
         }
     }
 
     public static function require(string $action): void
     {
         if (self::can($action) === false) {
-            throw new PermissionException(message: 'Your role may not use Cloudflare › ' . $action);
+            throw Compat::exception(PermissionException::class, 'Your role may not use Cloudflare › ' . $action);
         }
     }
 
@@ -91,7 +95,7 @@ final class Guard
         $user = App::instance()->user();
 
         if ($user === null || Panel::hasAccess($user, self::AREA) === false) {
-            throw new PermissionException(message: 'Your role may not use the Cloudflare area');
+            throw Compat::exception(PermissionException::class, 'Your role may not use the Cloudflare area');
         }
 
         if ($action !== null) {
@@ -105,16 +109,11 @@ final class Guard
         } catch (ApiException $e) {
             // always 502: passing on Cloudflare's 401 would make the Panel
             // think the Kirby session had expired and log the user out
-            throw new Exception(
-                message: $e->getMessage(),
-                httpCode: 502,
-                previous: $e,
-                translate: false
-            );
+            throw Compat::exception(Exception::class, $e->getMessage(), 502, $e);
         } catch (\InvalidArgumentException $e) {
-            throw new InvalidArgumentException(message: $e->getMessage(), previous: $e, translate: false);
+            throw Compat::exception(InvalidArgumentException::class, $e->getMessage(), previous: $e);
         } catch (Throwable $e) {
-            throw new Exception(message: 'Cloudflare request failed: ' . $e->getMessage(), httpCode: 500, previous: $e, translate: false);
+            throw Compat::exception(Exception::class, 'Cloudflare request failed: ' . $e->getMessage(), 500, $e);
         }
     }
 }

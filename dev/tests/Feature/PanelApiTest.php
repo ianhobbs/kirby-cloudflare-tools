@@ -46,8 +46,9 @@ it('turns Cloudflare errors into messages the Panel shows, without a 401', funct
         api('cloudflare-tools/purge', 'POST', ['type' => 'everything']);
         $this->fail('No exception');
     } catch (Exception $e) {
-        // a 401 would make the Panel log the user out
-        expect($e->getHttpCode())->toBe(502)
+        // a 401 would make the Panel log the user out; Kirby 4 keeps
+        // the default 500, see Compat::exception()
+        expect($e->getHttpCode())->toBe(lite() ? 500 : 502)
             ->and($e->getMessage())->toContain('Invalid API Token (1000), token not recognised');
     }
 });
@@ -58,7 +59,38 @@ it('lets editors purge but not change settings by default', function () {
     expect(api('cloudflare-tools/purge', 'POST', ['type' => 'urls', 'items' => ['https://example.com/a']], [], 'editor@example.com')['purged'])->toBe(1);
 
     api('cloudflare-tools/settings/cache', 'PATCH', ['changes' => ['development_mode' => true]], [], 'editor@example.com');
-})->throws(PermissionException::class);
+})->throws(PermissionException::class)->skip(lite(), 'Kirby 5 only: the settings routes');
+
+it('switches Development Mode', function (bool $on) {
+    $fake = fake()->on('PATCH', 'zones/{zone}/settings/development_mode', fn ($body) => ['result' => ['id' => 'development_mode'] + $body]);
+
+    $result = api('cloudflare-tools/development-mode', 'POST', ['enabled' => $on]);
+
+    expect($fake->last()['body'])->toBe(['value' => $on ? 'on' : 'off'])
+        ->and($result['developmentMode'])->toBe($on)
+        ->and($result['message'])->toBe($on ? 'Development Mode is on for three hours' : 'Development Mode is off');
+})->with([true, false]);
+
+it('lets editors switch Development Mode by default', function () {
+    fake()->on('PATCH', 'zones/{zone}/settings/development_mode', ['result' => ['id' => 'development_mode', 'value' => 'on']]);
+
+    expect(api('cloudflare-tools/development-mode', 'POST', ['enabled' => true], [], 'editor@example.com')['developmentMode'])->toBeTrue();
+});
+
+it('keeps roles that may not switch Development Mode from doing it', function () {
+    bootKirby(['transport' => new FakeCloudflare()], [
+        'users'      => [2 => ['email' => 'writer@example.com', 'role' => 'writer']],
+        'blueprints' => [
+            'users/writer' => [
+                'name'        => 'writer',
+                'title'       => 'Writer',
+                'permissions' => ['ianhobbs.cloudflare-tools' => ['developmentMode' => false]],
+            ],
+        ],
+    ]);
+
+    api('cloudflare-tools/development-mode', 'POST', ['enabled' => true], [], 'writer@example.com');
+})->throws(PermissionException::class, 'developmentMode');
 
 it('keeps roles without area access out entirely', function () {
     kirby()->impersonate('client@example.com');
@@ -72,8 +104,25 @@ it('keeps roles without area access from reading too', function (string $route) 
     fake();
 
     api($route, 'GET', [], [], 'client@example.com');
-})->with(['cloudflare-tools/status', 'cloudflare-tools/settings/ssl', 'cloudflare-tools/dns', 'cloudflare-tools/security'])
+})->with(lite() ? ['cloudflare-tools/status', 'cloudflare-tools/analytics'] : ['cloudflare-tools/status', 'cloudflare-tools/settings/ssl', 'cloudflare-tools/dns', 'cloudflare-tools/security'])
   ->throws(PermissionException::class);
+
+it('tells the Panel which edition runs', function () {
+    fake();
+
+    expect(api('cloudflare-tools/status')['edition'])->toBe(lite() ? 'lite' : 'full');
+});
+
+it('has no routes for the other tabs on Kirby 4', function (string $route, string $method) {
+    fake();
+
+    api($route, $method);
+})->with([
+    ['cloudflare-tools/dns', 'GET'],
+    ['cloudflare-tools/settings/cache', 'PATCH'],
+    ['cloudflare-tools/security/rules', 'POST'],
+    ['cloudflare-tools/zone/pause', 'POST'],
+])->throws(\Exception::class, 'No route found')->skip(lite() === false, 'Kirby 4 only');
 
 it('lets admins do everything', function () {
     kirby()->impersonate('kirby');
@@ -86,7 +135,7 @@ it('only changes settings of the group it was asked for', function () {
 
     // ssl belongs to the ssl group, so the cache route must not touch it
     api('cloudflare-tools/settings/cache', 'PATCH', ['changes' => ['ssl' => 'off']]);
-})->throws(Kirby\Exception\InvalidArgumentException::class, 'not part of cache');
+})->throws(Kirby\Exception\InvalidArgumentException::class, 'not part of cache')->skip(lite(), 'Kirby 5 only: the settings routes');
 
 it('keeps DNS read-only unless the site allows writes', function () {
     fake()->on('GET', 'zones/{zone}/dns_records', listReply([]));
@@ -94,7 +143,7 @@ it('keeps DNS read-only unless the site allows writes', function () {
     expect(api('cloudflare-tools/dns')['writable'])->toBeFalse();
 
     api('cloudflare-tools/dns', 'POST', ['type' => 'A', 'name' => 'x', 'content' => '203.0.113.7']);
-})->throws(PermissionException::class, 'read-only');
+})->throws(PermissionException::class, 'read-only')->skip(lite(), 'Kirby 5 only: the DNS tab');
 
 it('writes DNS when the site allows it', function () {
     $fake = fake(['dns' => 'write'])->on('POST', 'zones/{zone}/dns_records', fn ($body) => ['result' => ['id' => 'n1'] + $body]);
@@ -103,7 +152,7 @@ it('writes DNS when the site allows it', function () {
 
     expect($record['id'])->toBe('n1')
         ->and($fake->last()['body'])->toBe(['type' => 'A', 'name' => 'x', 'content' => '203.0.113.7', 'proxied' => true]);
-});
+})->skip(lite(), 'Kirby 5 only: the DNS tab');
 
 it('loads the page purge dialog with the URLs it will clear', function () {
     kirby()->impersonate('kirby');
@@ -114,4 +163,4 @@ it('loads the page purge dialog with the URLs it will clear', function () {
     expect($result['component'])->toBe('k-text-dialog')
         ->and($result['props']['text'])->toContain('https://example.com/blog/hello')
         ->and($result['props']['submitButton']['text'])->toBe('Purge 3 URLs');
-});
+})->skip(lite(), 'Kirby 5 only: view buttons');

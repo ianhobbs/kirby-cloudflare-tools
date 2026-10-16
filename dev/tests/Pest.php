@@ -1,6 +1,7 @@
 <?php
 
 use IanHobbs\CloudflareTools\Cloudflare;
+use IanHobbs\CloudflareTools\Compat;
 
 /**
  * Helpers shared across the suite. Each test that talks to "Cloudflare"
@@ -16,6 +17,16 @@ uses()->beforeEach(function () {
     }
     bootKirby();
 })->in('Feature');
+
+/**
+ * Whether the suite runs on Kirby 4, the lite edition. Tests of what only
+ * Kirby 5 has (the licence, the other tabs' routes, view buttons) skip with
+ * ->skip(lite(), …); the CI matrix runs the suite on both.
+ */
+function lite(): bool
+{
+    return Compat::lite();
+}
 
 /** Where the plugin keeps the licence state for the fixture site */
 function licenseFile(): string

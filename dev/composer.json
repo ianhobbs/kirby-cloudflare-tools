@@ -4,9 +4,9 @@
   "license": "MIT",
   "type": "project",
   "require-dev": {
-    "getkirby/cms": "^5.0",
-    "pestphp/pest": "^3.0",
-    "johannschopplich/kirby-helpers": "^7.0",
+    "getkirby/cms": "^4.3 || ^5.0",
+    "pestphp/pest": "^2.36 || ^3.0",
+    "johannschopplich/kirby-helpers": "^6.0 || ^7.0",
     "getkirby/cli": "^1.10"
   },
   "scripts": {

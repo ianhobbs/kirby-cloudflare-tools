@@ -40,13 +40,13 @@
           <k-toggle-input
             :key="'dev' + renders"
             :value="settings.developmentMode"
-            :disabled="!can.settings || busy"
+            :disabled="!can.developmentMode || busy"
             :text="['Off', 'On']"
             @input="toggleDevelopmentMode"
           />
         </div>
 
-        <div v-if="settings" class="cf-row">
+        <div v-if="settings && full" class="cf-row">
           <div>
             <strong>I'm Under Attack</strong>
             <p class="cf-muted">
@@ -63,7 +63,7 @@
           />
         </div>
 
-        <div v-if="status.zone" class="cf-row">
+        <div v-if="status.zone && full" class="cf-row">
           <div>
             <strong>{{ status.zone.paused ? 'Resume Cloudflare' : 'Pause Cloudflare' }}</strong>
             <p class="cf-muted">
@@ -131,6 +131,10 @@ export default {
   computed: {
     can() {
       return this.status.permissions ?? {};
+    },
+    // the Kirby 4 edition leaves out the zone-wide switches
+    full() {
+      return this.status.edition !== 'lite';
     },
     settings() {
       return this.status.settings;
@@ -202,7 +206,7 @@ export default {
     },
     toggleDevelopmentMode(on) {
       this.run(
-        () => this.cf('patch', 'settings/cache', { changes: { development_mode: on } }),
+        () => this.cf('post', 'development-mode', { enabled: on }),
         on ? 'Development Mode is on for three hours' : 'Development Mode is off'
       );
     },

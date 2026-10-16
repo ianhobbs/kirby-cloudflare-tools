@@ -13,6 +13,7 @@
 
 use Bnomei\Janitor;
 use IanHobbs\CloudflareTools\Cloudflare;
+use IanHobbs\CloudflareTools\Compat;
 use IanHobbs\CloudflareTools\Diagnostics;
 use IanHobbs\CloudflareTools\Licensing\LicenseManager;
 use Kirby\CLI\CLI;
@@ -60,6 +61,11 @@ return [
             ],
         ],
         'command' => static function (CLI $cli): void {
+            if (Compat::lite() === true) {
+                $cli->success('Kirby 4 sites need no Cloudflare Tools licence');
+                return;
+            }
+
             $license = LicenseManager::fromOptions();
             $action  = (string)$cli->arg('action');
             $key     = is_string($cli->arg('key')) && $cli->arg('key') !== '' ? $cli->arg('key') : null;

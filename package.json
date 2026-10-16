@@ -1,6 +1,6 @@
 {
   "name": "@ianhobbs/kirby-cloudflare-tools",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Kirby CMS plugin — a Cloudflare control panel in the Panel",
   "private": true,
   "type": "module",

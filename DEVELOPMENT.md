@@ -72,7 +72,7 @@ composer install
 composer test
 ```
 
-PHP 8.3+, Composer. Node 18+ only to change the Panel UI.
+PHP 8.2+ and Composer (the Kirby 4 suite also runs on 8.1). Node 18+ only to change the Panel UI.
 
 ## Tests
 
@@ -100,7 +100,8 @@ default permissions; `client@example.com` has no access to the area).
 
 | File | Covers |
 |---|---|
-| `PluginTest` | Registration, version, area/routes/commands/permissions, environment lookup |
+| `PluginTest` | Registration, version, area/routes/commands/permissions per edition, environment lookup |
+| `CompatTest` | Version detection, supported versions and editions, exceptions with unchanged messages |
 | `ClientTest` | Auth headers, bodies, transport failures, error hints, GraphQL errors, credential-free probe |
 | `CloudflareTest` | Zone ID validation, domain → zone lookup, `{zone}`/`{account}`, custom gates |
 | `CacheTest` | Every purge type, batching, validation, Tiered Cache |
@@ -110,11 +111,61 @@ default permissions; `client@example.com` has no access to the area).
 | `AnalyticsTest` | Normalising the GraphQL payload, query literal validation |
 | `DiagnosticsTest` | The full check, refused purges, wrong zones, probe states |
 | `PurgerTest` | Page URLs, `pageUrls`, purge-on-save hooks, failures not blocking saves |
-| `PanelApiTest` | Routes as admin/editor/no-access users, error mapping, DNS write gate, purge dialog |
+| `PanelApiTest` | Routes as admin/editor/no-access users, Development Mode and its permission, error mapping, DNS write gate, purge dialog, the lite route set |
 | `LicenseTest` | Development hosts, activation, refusals, daily checks, the 14-day grace, removal, the dialog, no key in the Panel |
 
 **Not covered:** the real Cloudflare API (check by hand with a token, below),
 and the Vue components (check in the dev site).
+
+### On Kirby 4
+
+`dev/` installs Kirby 5. To run the suite on Kirby 4, swap Kirby for one
+`composer update` without touching `composer.json`, then go back:
+
+```bash
+cd dev
+cp composer.lock /tmp/composer.lock.k5
+composer update getkirby/cms -W --with "getkirby/cms:^4.9"
+composer test
+cp /tmp/composer.lock.k5 composer.lock && composer install
+```
+
+Tests of what only one edition has skip on the other, with
+`->skip(lite(), 'Kirby 5 only')` or `->skip(lite() === false, 'Kirby 4 only')`.
+Kirby 4.3 doesn't run on PHP 8.4 or later, so only CI covers it.
+
+CI (`.github/workflows/tests.yml`) runs the suite on Kirby 4.3 · PHP 8.1,
+Kirby 4.9 · PHP 8.1 and 8.4, and Kirby 5 · PHP 8.2 and 8.5, plus a
+non-blocking check that the plugin switches itself off on the Kirby 6 beta.
+
+## Two Kirby versions, one codebase
+
+1.x runs on Kirby 4.3+ and Kirby 5 from the same code and the same Panel
+bundle (both Panels are Vue 2.7):
+
+| | Kirby 4.3+ (lite) | Kirby 5 (full) |
+|---|---|---|
+| Panel | Overview tab only: Development Mode, Purge everything, traffic | Every tab, the page Purge button, the licence dialog |
+| API routes | `Compat::LITE_ROUTES` | All of `config/api.php` |
+| Licence | None needed; no System view status | Required on public sites |
+| CLI, hooks, `site()->cloudflare()` | Same | Same |
+
+`classes/Compat.php` is the only place that knows which Kirby runs. Anything
+that differs asks it:
+
+- `Compat::supported()`: `index.php` registers nothing (and logs why) before
+  Kirby 4.3 or from Kirby 6 on. Composer installs are stopped earlier by the
+  `conflict` rule; this covers ZIP and submodule installs.
+- `Compat::lite()`: true on Kirby 4. Decides the tabs (`View::tabs()`), the
+  routes, the area's dialogs and buttons, the licence, and what `/status`
+  reports as `edition`, which the Overview tab reads.
+- `Compat::exception()`: every Kirby exception the plugin throws. Kirby 4
+  takes a plain string (its array arguments would template the message),
+  Kirby 5 named arguments.
+
+Version-neutral code (the client, the API gates, Purger, Diagnostics, the
+licence logic) never checks the version. Keep new version checks in
+`Compat`, so the Kirby 6 port stays a matter of deleting branches.
 
 ## The visual dev site
 
@@ -311,8 +362,33 @@ once, after the first tag.
 
 ## Kirby 6
 
-The current line targets Kirby 5 (Vue 2 Panel) and is pinned with
-`"conflict": {"getkirby/cms": "<5.0.0 || >=6.0.0"}`. Kirby 6 moves the Panel
-to Vue 3; that is a major version of this plugin with a newer kirbyup. The
-components use the Options API and core `k-*` components only, so the port
-should mostly be verification.
+1.x is pinned below Kirby 6 with
+`"conflict": {"getkirby/cms": "<4.3.0 || >=6.0.0"}`. Kirby 6 moves the Panel
+to Vue 3 and needs PHP 8.3+, so it gets its own major version:
+
+- **2.x** supports Kirby 6 only, on PHP 8.3+, from `main`
+  (`conflict <6.0.0 || >=7.0.0`). One Panel bundle can't serve Vue 2 and
+  Vue 3, so no release spans Kirby 5 and 6.
+- **1.x** moves to a `1.x` branch when 2.0 ships and keeps getting fixes
+  for Kirby 4 and 5 sites.
+
+What 6.0.0-beta.1 already shows the port needs:
+
+- `Compat`: delete the Kirby 4 branches and the `lite()` paths, and
+  `LITE_ROUTES` with them (or keep a lite mode, if Kirby 6 sites want one).
+  The named-argument exceptions stay: Kirby 6 drops the array form, and its
+  first parameter is now `$message`. It also keeps `previous`, which
+  Kirby 5 drops.
+- The Panel bundle: the kirbyup major for Kirby 6 (Vue 3.5, Vite 8), then a
+  pass over the components for Vue 3 changes: `:value`/`@input` on the
+  `k-*-input` components (check whether Kirby 6 moved to `modelValue`),
+  `$listeners`, `.sync`, `$set`, `emits`.
+- View buttons: Kirby 6 moved the button classes (`Panel\Ui\Buttons` became
+  `Panel\Ui\Button`). The plugin only declares buttons as arrays in the
+  area, so it is probably unaffected; check it.
+- Unchanged in the beta: `Kirby::plugin(license:)`, `Kirby\Plugin\License`
+  and `LicenseStatus`, `Panel::hasAccess()`, `Find`.
+
+Until then, in 1.x: Options API and core `k-*` components only, no direct use
+of `Panel\Ui` classes, and no Kirby 5 APIs that Kirby 5 already marks as
+deprecated.

@@ -1,15 +1,17 @@
 <?php
 
 use IanHobbs\CloudflareTools\Cloudflare;
+use IanHobbs\CloudflareTools\Compat;
 use IanHobbs\CloudflareTools\Options;
 use IanHobbs\CloudflareTools\Panel\Guard;
+use IanHobbs\CloudflareTools\Panel\View;
 use Kirby\Cms\App;
 
 it('registers the plugin with its version', function () {
     $plugin = App::plugin('ianhobbs/cloudflare-tools');
 
     expect($plugin)->not->toBeNull()
-        ->and($plugin->version())->toBe('1.0.1');
+        ->and($plugin->version())->toBe('1.1.0');
 });
 
 it('follows Kirby\'s naming convention: kirby- prefix outside Kirby only', function () {
@@ -21,7 +23,8 @@ it('follows Kirby\'s naming convention: kirby- prefix outside Kirby only', funct
         // inside Kirby
         ->and(App::plugin('ianhobbs/cloudflare-tools'))->not->toBeNull()
         ->and($composer['extra']['installer-name'])->toBe('cloudflare-tools')
-        ->and($composer['extra']['kirby']['compatible'])->toBe('^5.0');
+        ->and($composer['extra']['kirby']['compatible'])->toBe('^4.3 || ^5.0')
+        ->and($composer['conflict']['getkirby/cms'])->toBe('<4.3.0 || >=6.0.0');
 });
 
 it('shows its licence in the System view, with a status that opens the dialog', function () {
@@ -34,7 +37,7 @@ it('shows its licence in the System view, with a status that opens the dialog', 
             'label'  => 'Activate',
             'dialog' => 'cloudflare-tools/license',
         ]);
-});
+})->skip(lite(), 'Kirby 4 has no plugin licences');
 
 it('registers the Panel area, page button and purge dialog', function () {
     $areas = kirby()->extensions('areas');
@@ -46,7 +49,15 @@ it('registers the Panel area, page button and purge dialog', function () {
     expect($area['icon'])->toBe('cloud')
         ->and($area['buttons'])->toHaveKey('cloudflare-purge')
         ->and($area['dialogs'])->toHaveKey('cloudflare-tools.purge-page');
-});
+})->skip(lite(), 'Kirby 5 only');
+
+it('registers only the area on Kirby 4: no licence, no view buttons', function () {
+    $area = kirby()->extensions('areas')[Guard::AREA][0](kirby());
+
+    expect($area['icon'])->toBe('cloud')
+        ->and($area)->not->toHaveKeys(['buttons', 'dialogs'])
+        ->and(array_keys(View::tabs()))->toBe(['overview']);
+})->skip(lite() === false, 'Kirby 4 only');
 
 it('registers its API routes under cloudflare-tools/', function () {
     $patterns = array_column(kirby()->extensions('api')['routes'], 'pattern');
@@ -54,9 +65,16 @@ it('registers its API routes under cloudflare-tools/', function () {
     expect($patterns)->toContain('cloudflare-tools/status')
         ->toContain('cloudflare-tools/purge')
         ->toContain('cloudflare-tools/settings/(:any)')
+        ->toContain('cloudflare-tools/development-mode')
         ->toContain('cloudflare-tools/dns')
         ->toContain('cloudflare-tools/diagnostics');
-});
+})->skip(lite(), 'Kirby 5 only');
+
+it('registers only the Overview tab\'s routes on Kirby 4', function () {
+    $patterns = array_column(kirby()->extensions('api')['routes'], 'pattern');
+
+    expect($patterns)->toBe(Compat::LITE_ROUTES);
+})->skip(lite() === false, 'Kirby 4 only');
 
 it('registers the CLI commands', function () {
     expect(kirby()->extensions('commands'))
@@ -66,10 +84,11 @@ it('registers the CLI commands', function () {
 it('registers role permissions with safe defaults', function () {
     expect(kirby()->extensions('permissions'))->toHaveKey(Options::PREFIX)
         ->and(Guard::PERMISSIONS)->toMatchArray([
-            'purge'    => true,
-            'settings' => false,
-            'security' => false,
-            'dns'      => false,
+            'purge'           => true,
+            'developmentMode' => true,
+            'settings'        => false,
+            'security'        => false,
+            'dns'             => false,
         ]);
 });
 
