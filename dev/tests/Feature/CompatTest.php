@@ -25,9 +25,10 @@ it('knows which Kirby versions it runs on, and which edition', function (string 
         ->and(Compat::lite())->toBe($lite);
 })->with([
     'Kirby 3'        => ['3.10.1', false, false],
-    'Kirby 4.2'      => ['4.2.0', false, true],
-    'Kirby 4.3'      => ['4.3.0', true, true],
-    'Kirby 4.9'      => ['4.9.6', true, true],
+    'Kirby 4.3'      => ['4.3.0', false, true],
+    'Kirby 4.9.5'    => ['4.9.5', false, true],
+    'Kirby 4.9.6'    => ['4.9.6', true, true],
+    'Kirby 4.9.7'    => ['4.9.7', true, true],
     'Kirby 5'        => ['5.6.1', true, false],
     'Kirby 6 beta'   => ['6.0.0-beta.1', false, false],
     'Kirby 6'        => ['6.0.0', false, false],

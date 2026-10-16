@@ -72,7 +72,7 @@ composer install
 composer test
 ```
 
-PHP 8.2+ and Composer (the Kirby 4 suite also runs on 8.1). Node 18+ only to change the Panel UI.
+PHP 8.2+ and Composer. Node 18+ only to change the Panel UI.
 
 ## Tests
 
@@ -125,25 +125,28 @@ and the Vue components (check in the dev site).
 ```bash
 cd dev
 cp composer.lock /tmp/composer.lock.k5
-composer update getkirby/cms -W --with "getkirby/cms:^4.9"
+composer update getkirby/cms -W --with "getkirby/cms:^4.9.6"
 composer test
 cp /tmp/composer.lock.k5 composer.lock && composer install
 ```
 
 Tests of what only one edition has skip on the other, with
 `->skip(lite(), 'Kirby 5 only')` or `->skip(lite() === false, 'Kirby 4 only')`.
-Kirby 4.3 doesn't run on PHP 8.4 or later, so only CI covers it.
-
-CI (`.github/workflows/tests.yml`) runs the suite on Kirby 4.3 · PHP 8.1,
-Kirby 4.9 · PHP 8.1 and 8.4, and Kirby 5 · PHP 8.2 and 8.5, plus a
+CI (`.github/workflows/tests.yml`) runs the suite on Kirby 4.9.6 · PHP 8.2,
+the newest Kirby 4 · PHP 8.4, and Kirby 5 · PHP 8.2 and 8.5, plus a
 non-blocking check that the plugin switches itself off on the Kirby 6 beta.
+
+Why these floors: every Kirby 4 release before 4.9.6 has known security
+advisories (one critical) in Kirby or a package it pins, and Composer 2.10
+refuses to install them. Pest
+no longer runs on PHP 8.1, which has been end-of-life since the end of 2025.
 
 ## Two Kirby versions, one codebase
 
-1.x runs on Kirby 4.3+ and Kirby 5 from the same code and the same Panel
+1.x runs on Kirby 4.9.6+ and Kirby 5 from the same code and the same Panel
 bundle (both Panels are Vue 2.7):
 
-| | Kirby 4.3+ (lite) | Kirby 5 (full) |
+| | Kirby 4.9.6+ (lite) | Kirby 5 (full) |
 |---|---|---|
 | Panel | Overview tab only: Development Mode, Purge everything, traffic | Every tab, the page Purge button, the licence dialog |
 | API routes | `Compat::LITE_ROUTES` | All of `config/api.php` |
@@ -154,7 +157,7 @@ bundle (both Panels are Vue 2.7):
 that differs asks it:
 
 - `Compat::supported()`: `index.php` registers nothing (and logs why) before
-  Kirby 4.3 or from Kirby 6 on. Composer installs are stopped earlier by the
+  Kirby 4.9.6 or from Kirby 6 on. Composer installs are stopped earlier by the
   `conflict` rule; this covers ZIP and submodule installs.
 - `Compat::lite()`: true on Kirby 4. Decides the tabs (`View::tabs()`), the
   routes, the area's dialogs and buttons, the licence, and what `/status`
@@ -363,7 +366,7 @@ once, after the first tag.
 ## Kirby 6
 
 1.x is pinned below Kirby 6 with
-`"conflict": {"getkirby/cms": "<4.3.0 || >=6.0.0"}`. Kirby 6 moves the Panel
+`"conflict": {"getkirby/cms": "<4.9.6 || >=6.0.0"}`. Kirby 6 moves the Panel
 to Vue 3 and needs PHP 8.3+, so it gets its own major version:
 
 - **2.x** supports Kirby 6 only, on PHP 8.3+, from `main`

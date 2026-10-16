@@ -1,11 +1,11 @@
 # Cloudflare Tools for Kirby
 
 [![Kirby 5](https://img.shields.io/badge/Kirby-5-000000)](#requirements)
-[![Kirby 4.3+ lite edition](https://img.shields.io/badge/Kirby-4.3%2B_lite-555555)](#on-kirby-4-the-lite-edition)
-[![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](#requirements)
+[![Kirby 4.9.6+ lite edition](https://img.shields.io/badge/Kirby-4.9.6%2B_lite-555555)](#on-kirby-4-the-lite-edition)
+[![PHP 8.2+](https://img.shields.io/badge/PHP-8.2%2B-777bb4)](#requirements)
 [![Cloudflare: any plan, including Free](https://img.shields.io/badge/Cloudflare-any_plan,_incl._Free-f38020)](#what-it-covers)
 
-**For Kirby 5, and Kirby 4.3+ as a lite edition** · PHP 8.1+ · any Cloudflare plan, including Free
+**For Kirby 5, and Kirby 4.9.6+ as a lite edition** · PHP 8.2+ · any Cloudflare plan, including Free
 
 A Cloudflare control panel inside the Kirby Panel. Editors purge the cache,
 switch Development Mode or "I'm Under Attack", and read their traffic;
@@ -37,7 +37,7 @@ Cloudflare from the server.
 
 ### On Kirby 4: the lite edition
 
-On Kirby 4.3 and later, the plugin runs a smaller, free edition that covers
+On Kirby 4.9.6 and later, the plugin runs a smaller, free edition that covers
 what editors need while they work on the site. The Cloudflare area has one
 page with:
 
@@ -52,10 +52,12 @@ pause) are Kirby 5 only. Kirby 4 sites need no licence.
 
 ## Requirements
 
-- Kirby 5, or Kirby 4.3 or later for the [lite edition](#on-kirby-4-the-lite-edition).
-  Kirby 6 is not supported yet; on Kirby 6 (and before 4.3) the plugin
-  switches itself off and logs why, instead of breaking the site.
-- PHP 8.1 or later, with cURL (Kirby 5 itself needs 8.2 or later).
+- Kirby 5, or Kirby 4.9.6 or later for the [lite edition](#on-kirby-4-the-lite-edition).
+  Every older Kirby 4 release has known security advisories (in Kirby or a
+  package it pins), so update Kirby first (`composer update getkirby/cms`). Kirby 6 is not supported
+  yet; on Kirby 6 (and before 4.9.6) the plugin switches itself off and logs
+  why, instead of breaking the site.
+- PHP 8.2 or later, with cURL.
 - A domain on Cloudflare (any plan)
 
 ## Installation

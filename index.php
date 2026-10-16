@@ -38,7 +38,7 @@ if (class_exists(Cloudflare::class) === false) {
     });
 }
 
-// Kirby before 4.3, or Kirby 6 and later: switch off instead of taking the
+// Kirby before 4.9.6, or Kirby 6 and later: switch off instead of taking the
 // site down. Composer installs are stopped earlier, by the `conflict` rule.
 if (Compat::supported() === false) {
     error_log('[' . Options::PREFIX . '] needs Kirby ' . Compat::MINIMUM . ' or later 4.x, or Kirby 5; this is Kirby ' . Compat::version() . ', so the plugin is switched off');

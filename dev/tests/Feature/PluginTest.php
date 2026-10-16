@@ -23,8 +23,8 @@ it('follows Kirby\'s naming convention: kirby- prefix outside Kirby only', funct
         // inside Kirby
         ->and(App::plugin('ianhobbs/cloudflare-tools'))->not->toBeNull()
         ->and($composer['extra']['installer-name'])->toBe('cloudflare-tools')
-        ->and($composer['extra']['kirby']['compatible'])->toBe('^4.3 || ^5.0')
-        ->and($composer['conflict']['getkirby/cms'])->toBe('<4.3.0 || >=6.0.0');
+        ->and($composer['extra']['kirby']['compatible'])->toBe('^4.9.6 || ^5.0')
+        ->and($composer['conflict']['getkirby/cms'])->toBe('<4.9.6 || >=6.0.0');
 });
 
 it('shows its licence in the System view, with a status that opens the dialog', function () {

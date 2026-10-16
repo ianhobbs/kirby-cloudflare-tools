@@ -9,7 +9,7 @@ use Throwable;
 /**
  * The one place that knows which Kirby is running.
  *
- * Kirby 5 runs the full plugin. Kirby 4.3+ runs the lite edition: the
+ * Kirby 5 runs the full plugin. Kirby 4.9.6+ runs the lite edition: the
  * Overview tab only (Development Mode, Purge everything, traffic), and no
  * licence. Everything that differs between the two asks this class, so the
  * Kirby 6 port (plugin 2.0) deletes the Kirby 4 branches here and the
@@ -17,8 +17,12 @@ use Throwable;
  */
 final class Compat
 {
-    /** The oldest Kirby the plugin runs on: Kirby::plugin(version:) arrived in 4.3 */
-    public const MINIMUM = '4.3.0';
+    /**
+     * The oldest Kirby the plugin runs on: the first Kirby 4 that Composer
+     * installs. Older releases, or packages they pin, have known security
+     * advisories, and Composer refuses them.
+     */
+    public const MINIMUM = '4.9.6';
 
     /** The API routes the lite edition registers, by pattern */
     public const LITE_ROUTES = [
@@ -41,7 +45,7 @@ final class Compat
         return (int)self::version();
     }
 
-    /** Kirby 4.3 up to (not including) Kirby 6 */
+    /** Kirby 4.9.6 up to (not including) Kirby 6 */
     public static function supported(): bool
     {
         return version_compare(self::version(), self::MINIMUM, '>=') && self::major() < 6;
