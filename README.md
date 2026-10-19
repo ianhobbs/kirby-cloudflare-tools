@@ -32,7 +32,8 @@ Cloudflare from the server.
 
 ## Requirements
 
-- Kirby 5
+- Kirby 5. On Kirby 6 this version switches itself off and logs why;
+  Kirby 6 sites need Cloudflare Tools 2.x.
 - PHP 8.3 or later, with cURL. 8.3 is the minimum: Composer refuses to
   install the plugin on older versions.
 - A domain on Cloudflare (any plan)

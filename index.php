@@ -15,6 +15,7 @@
  */
 
 use IanHobbs\CloudflareTools\Cloudflare;
+use IanHobbs\CloudflareTools\Compat;
 use IanHobbs\CloudflareTools\Licensing\LicenseManager;
 use IanHobbs\CloudflareTools\Options;
 use IanHobbs\CloudflareTools\Panel\Guard;
@@ -37,9 +38,17 @@ if (class_exists(Cloudflare::class) === false) {
     });
 }
 
+// Any Kirby but 5 (Kirby 6 needs plugin 2.x): register nothing and log why,
+// instead of breaking the Panel. Composer installs never get this far, the
+// `conflict` rule refuses them.
+if (Compat::supported() === false) {
+    error_log(Compat::message());
+    return;
+}
+
 Kirby::plugin(
     name: 'ianhobbs/cloudflare-tools',
-    version: '1.0.1',
+    version: '1.0.2',
     // Shown in the Panel's System view, with a status that opens the
     // activation dialog. Read from the stored state: no network call.
     license: fn (Plugin $plugin) => LicenseManager::fromOptions()->toPanel($plugin),

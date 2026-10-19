@@ -316,3 +316,8 @@ The current line targets Kirby 5 (Vue 2 Panel) and is pinned with
 to Vue 3; that is a major version of this plugin with a newer kirbyup. The
 components use the Options API and core `k-*` components only, so the port
 should mostly be verification.
+
+ZIP and submodule installs never see the `conflict` rule, so `index.php`
+asks `Compat::supported()` first: on any Kirby but 5 it registers nothing
+and logs `Compat::message()`. `classes/Compat.php` is the only place that
+checks the Kirby version.
