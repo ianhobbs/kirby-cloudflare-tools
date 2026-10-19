@@ -318,6 +318,12 @@ bundle can't serve Vue 2 and Vue 3, so no release spans Kirby 5 and 6.
 Kirby 4 is not supported (a Kirby 4 lite edition was tried and dropped; the
 work is kept at the tag `archive/kirby4-lite`).
 
+ZIP and submodule installs never see the `conflict` rule, so `index.php`
+asks `Compat::supported()` first: on any Kirby major but `Compat::KIRBY`
+it registers nothing and logs `Compat::message()`. `classes/Compat.php` is
+the only place that checks the Kirby version. `Compat::KIRBY` is 5 on
+`main` and 6 on `feature/kirby6`; keep it 6 when merging `main` in.
+
 ### Branches
 
 - `main` stays 1.x (Kirby 5) and takes 1.x fixes until 2.0.0 ships.
@@ -388,10 +394,8 @@ PHP:
    `"conflict": {"getkirby/cms": "<6.0.0-beta.1 || >=7.0.0"}`,
    `extra.kirby.compatible: "^6.0"` (also matches the betas), keyword
    `kirby6` in place of `kirby5`.
-4. Version guard: Composer's `conflict` doesn't stop ZIP and submodule
-   installs. Register nothing (and log why) on Kirby before 6, like
-   `Compat::supported()` in `archive/kirby4-lite`, so a 2.x copy on a
-   Kirby 5 site switches itself off instead of breaking the Panel.
+4. Version guard: done. `Compat::KIRBY` is 6, so a 2.x copy on a Kirby 5
+   site switches itself off and its log message points to 1.x.
 5. Exceptions already use named arguments (Kirby 6 dropped the array form)
    and view buttons are declared as arrays in the area, so neither needs
    changes. Check again after each Kirby beta.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 — 2026-10-19
+
+- On any Kirby but Kirby 5, the plugin now switches itself off and logs
+  why, instead of breaking the Panel. This matters for ZIP and submodule
+  installs; Composer already refuses other Kirby versions. Kirby 6 sites
+  need Cloudflare Tools 2.x.
+
 ## 1.0.1 — 2026-10-15
 
 - Licence checks are switched on: keys are activated and checked against
