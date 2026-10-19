@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.2 — unreleased
+## 1.0.2 — 2026-10-19
 
 - On any Kirby but Kirby 5, the plugin now switches itself off and logs
   why, instead of breaking the Panel. This matters for ZIP and submodule
