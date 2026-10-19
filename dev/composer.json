@@ -1,14 +1,17 @@
 {
   "name": "ianhobbs/kirby-cloudflare-tools-dev",
-  "description": "Development environment for the kirby-cloudflare-tools plugin — Kirby install + Pest suite. Not published.",
+  "description": "Development environment for the kirby-cloudflare-tools plugin (2.x, Kirby 6) — Kirby install, Pest suite and Kirby MCP. Not published.",
   "license": "MIT",
   "type": "project",
   "require-dev": {
-    "getkirby/cms": "^5.0",
-    "pestphp/pest": "^3.0",
+    "getkirby/cms": "^6.0@beta",
+    "pestphp/pest": "^4.0",
     "johannschopplich/kirby-helpers": "^7.0",
-    "getkirby/cli": "^1.10"
+    "getkirby/cli": "^1.10",
+    "bnomei/kirby-mcp": "^6.1"
   },
+  "minimum-stability": "beta",
+  "prefer-stable": true,
   "scripts": {
     "test": "pest --colors=always",
     "test:coverage": "pest --colors=always --coverage",

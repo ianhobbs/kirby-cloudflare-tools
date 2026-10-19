@@ -309,10 +309,139 @@ from tags. ZIP and submodule installs get the version from
 composer.json (see the packaging guide). Submit the package to Packagist
 once, after the first tag.
 
-## Kirby 6
+## Kirby 6 (2.x)
 
-The current line targets Kirby 5 (Vue 2 Panel) and is pinned with
+1.x targets Kirby 5 (Vue 2 Panel) and is pinned with
 `"conflict": {"getkirby/cms": "<5.0.0 || >=6.0.0"}`. Kirby 6 moves the Panel
-to Vue 3; that is a major version of this plugin with a newer kirbyup. The
-components use the Options API and core `k-*` components only, so the port
-should mostly be verification.
+to Vue 3 and needs PHP 8.3+, so it gets its own major version. One Panel
+bundle can't serve Vue 2 and Vue 3, so no release spans Kirby 5 and 6.
+Kirby 4 is not supported (a Kirby 4 lite edition was tried and dropped; the
+work is kept at the tag `archive/kirby4-lite`).
+
+### Branches
+
+- `main` stays 1.x (Kirby 5) and takes 1.x fixes until 2.0.0 ships.
+- `feature/kirby6` is the 2.x line. Work on it in a second worktree, so
+  each checkout keeps its own `dev/vendor` (Kirby 5 in one, Kirby 6 in the
+  other):
+
+  ```bash
+  git worktree add -b feature/kirby6 ../kirby-cloudflare-tools-kirby6 main
+  ```
+
+- 2.0.0 betas are tagged on `feature/kirby6` and marked as pre-releases.
+- When Kirby 6.0.0 is stable and 2.0.0 is ready: branch `1.x` from `main`,
+  merge `feature/kirby6` into `main`, tag 2.0.0.
+
+### The Kirby 6 dev environment
+
+On `feature/kirby6`, `dev/composer.json` installs the Kirby 6 beta
+(`minimum-stability: beta`), Pest 4 (PHP 8.3+) and
+[Kirby MCP](https://github.com/bnomei/kirby-mcp) 6.x, whose knowledge base
+and skills follow Kirby 6 (Kirby MCP 1.x is the Kirby 5 line):
+
+```bash
+cd dev
+composer update -W
+vendor/bin/kirby-mcp install --project="$PWD"   # runtime commands + adapter, gitignored
+claude mcp add kirby -- "$PWD/vendor/bin/kirby-mcp" "--project=$PWD"
+```
+
+Run `claude mcp add` from the worktree root with absolute paths, so the
+server belongs to that folder only. After `composer update
+bnomei/kirby-mcp`, run `vendor/bin/kirby-mcp update`.
+
+The Panel bundle needs kirbyup 4 (pre-release under the `next` tag),
+which needs Node 24+:
+
+```bash
+nvm use 24
+npx kirbyup@next src/index.js       # build
+npx kirbyup@next dev src/index.js   # dev server; writes index.dev.js
+```
+
+Kirby 6 loads `index.dev.js` instead of `index.js` when it exists (Kirby 5
+used `index.dev.mjs`). It is gitignored and must never ship.
+
+### Status on 6.0.0-beta.1 (checked 2026-10-19)
+
+- **Pest suite:** 130 of 148 pass. All 18 failures have one cause,
+  `Panel::hasAccess()` in `Panel\Guard`, which Kirby 6 removed. With that
+  call replaced, all 148 pass.
+- **Panel bundle:** builds with kirbyup 4.0.0-beta.1 without changes
+  (33 kB). Not yet checked in the browser.
+- **Dev site:** boots; the Panel install screen loads.
+
+### Port checklist
+
+PHP:
+
+1. `Panel\Guard`: replace `Panel::hasAccess($user, self::AREA)` (lines 48
+   and 93). Kirby 6's `$kirby->panel()->access()->area($area)` only checks
+   the logged-in user, but `Guard::can()` takes any `$user`, so read that
+   user's `access` permissions directly, or drop the `$user` parameter.
+2. Trusted HTML: Kirby 6 escapes plain strings in dialog text and in
+   `k-box`, `k-text`, `k-item` and `k-tag`. `config/areas.php` builds HTML
+   for the licence dialog's info text (line 81 on) and the purge dialog
+   (line 178 on): wrap it in `Kirby\Toolkit\HtmlString`.
+3. `composer.json`: `"php": ">=8.3"`,
+   `"conflict": {"getkirby/cms": "<6.0.0-beta.1 || >=7.0.0"}`,
+   `extra.kirby.compatible: "^6.0"` (also matches the betas), keyword
+   `kirby6` in place of `kirby5`.
+4. Version guard: Composer's `conflict` doesn't stop ZIP and submodule
+   installs. Register nothing (and log why) on Kirby before 6, like
+   `Compat::supported()` in `archive/kirby4-lite`, so a 2.x copy on a
+   Kirby 5 site switches itself off instead of breaking the Panel.
+5. Exceptions already use named arguments (Kirby 6 dropped the array form)
+   and view buttons are declared as arrays in the area, so neither needs
+   changes. Check again after each Kirby beta.
+
+Panel (Vue 3):
+
+1. `package.json`: `kirbyup` `^4` (the `next` tag until it is stable),
+   `engines.node` `>=24`, drop the Vite 6 override; add an `.nvmrc`.
+2. `DnsTab.vue` line 6: `v-model` on a `k-*-input` silently stops working
+   in Vue 3. Bind `:value` and `@input` as the other tabs do.
+3. Trusted HTML: the confirm dialogs in `DnsTab.vue` (line 192) and
+   `SecurityTab.vue` (line 199) pass HTML as text. Mark it with `$h()`.
+4. Check every tab, the page Purge button and the licence dialog in the dev
+   site with the browser console open: Kirby logs components it can't
+   register, and kirbyup's dev mode adds Vue's warnings.
+5. Every component that emits declares `emits` already; keep it that way
+   (undeclared listeners land on the root element in Vue 3).
+
+Kirby 6 features to look at once the port works:
+
+- **Content negotiation:** Kirby 6 can serve a page's Markdown or JSON
+  representation for the same URL, chosen by the `Accept` header.
+  Cloudflare's cache doesn't vary on `Accept`, so a cached HTML page could
+  be served to a client asking for JSON, or the other way round. Find out
+  what Kirby sends (`Vary`, cache headers) and document it; maybe warn in
+  Diagnostics when it is on.
+- **Buttons field:** a blueprint field that opens a dialog. A ready-made
+  "Purge this page" button for blueprints would suit editors.
+- **Live editor:** check how purge-on-save behaves while editors type in
+  the new live preview (it should still fire only on save).
+
+Licence:
+
+1. 2.x needs a new licence: Polar has no upgrade option, so 2.x is its own
+   Polar product with its own licence-key benefit, and 1.x keys must not
+   activate it.
+2. `Licensing\Polar`: add the 2.x benefit ID as a constant (overridable
+   through `licenseServer`, for the sandbox). Pass it as `benefit_id` to
+   `validate`. `activate` takes no `benefit_id` but returns the key's, so
+   compare it; for a key from another product, deactivate it straight away
+   and refuse it with a message that a Kirby 6 licence is needed.
+3. Tests for a 1.x key refused on activation and on the daily check.
+
+CI and release:
+
+1. `main` has no CI yet. `.github/workflows/tests.yml` in
+   `archive/kirby4-lite` is a starting point: on `main` run Kirby 5 · PHP
+   8.2 and 8.5, on `feature/kirby6` the Kirby 6 beta · PHP 8.3 and 8.5.
+2. Tag 2.0.0-beta.1 once the checklist above passes on the Kirby beta.
+   Re-test on every Kirby beta and RC; Kirby plans 6.0.0 before the end of
+   2026.
+3. README: supported Kirby versions at the top, an upgrade note from 1.x,
+   and which plugin line to install for Kirby 5 and Kirby 6.

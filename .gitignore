@@ -33,3 +33,8 @@ VENDOR-STRATEGY.md
 README.pdf
 VENDOR-STRATEGY.pdf
 src/assets/Poster.ai
+
+# kirbyup dev server entry (Kirby 6: index.dev.js, Kirby 5: index.dev.mjs);
+# Kirby loads it instead of index.js, so it must never ship
+index.dev.js
+index.dev.mjs
