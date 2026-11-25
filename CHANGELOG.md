@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Errors from Cloudflare or the licence server now reach the Panel as
+  HTTP 424 instead of 502. On sites behind Cloudflare's proxy, Cloudflare
+  replaced the 502 with its own error page, so the Panel left the page and
+  showed raw JSON (or "Invalid CSRF token" on Kirby 5.6.4) instead of the
+  message. A refused licence key in the licence dialog, for example, now
+  shows the licence server's reason.
+
 ## 1.0.2 — 2026-10-19
 
 - On any Kirby but Kirby 5, the plugin now switches itself off and logs

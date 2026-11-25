@@ -103,11 +103,16 @@ final class Guard
         } catch (Exception $e) {
             throw $e;
         } catch (ApiException $e) {
-            // always 502: passing on Cloudflare's 401 would make the Panel
-            // think the Kirby session had expired and log the user out
+            // always 424 (Failed Dependency), whatever the remote service said:
+            // - Cloudflare's 401 would make the Panel think the Kirby session
+            //   had expired and log the user out
+            // - a 502 or 504 from a site behind Cloudflare's proxy is replaced
+            //   by Cloudflare's own HTML error page; the Panel then gives up on
+            //   the request and opens its URL as a page (raw JSON, or "Invalid
+            //   CSRF token" since Kirby 5.6.4) instead of showing this message
             throw new Exception(
                 message: $e->getMessage(),
-                httpCode: 502,
+                httpCode: 424,
                 previous: $e,
                 translate: false
             );

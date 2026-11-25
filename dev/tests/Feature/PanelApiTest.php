@@ -46,8 +46,9 @@ it('turns Cloudflare errors into messages the Panel shows, without a 401', funct
         api('cloudflare-tools/purge', 'POST', ['type' => 'everything']);
         $this->fail('No exception');
     } catch (Exception $e) {
-        // a 401 would make the Panel log the user out
-        expect($e->getHttpCode())->toBe(502)
+        // a 401 would make the Panel log the user out, and Cloudflare's proxy
+        // would replace a 502 with its own HTML error page
+        expect($e->getHttpCode())->toBe(424)
             ->and($e->getMessage())->toContain('Invalid API Token (1000), token not recognised');
     }
 });

@@ -33,3 +33,16 @@ VENDOR-STRATEGY.md
 README.pdf
 VENDOR-STRATEGY.pdf
 src/assets/Poster.ai
+
+
+# --- Sensitive files: security review 2026-11-22 (Claude) ---
+# NOTE: already-tracked files must also be untracked with `git rm --cached` — see SECURITY-TODO.md
+!.env.example
+*.pem
+*.key
+id_rsa*
+*.sqlite
+.htpasswd
+site/accounts/
+*.license
+.license

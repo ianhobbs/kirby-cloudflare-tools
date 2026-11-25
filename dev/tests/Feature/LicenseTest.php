@@ -236,6 +236,30 @@ it('activates from the licence dialog, for admins', function () {
         ->and($fake->last()['body']['label'])->toBe('example.com');
 });
 
+it('shows the seller\'s refusal in the licence dialog, as a status Cloudflare passes through', function () {
+    $fake = polar(new FakeCloudflare())
+        ->on('POST', '/v1/customer-portal/license-keys/activate', ['detail' => 'License key does not require activation'], 403);
+
+    bootKirby(
+        ['licenseServer' => ['organization' => ORG], 'transport' => $fake],
+        ['request' => ['method' => 'POST', 'body' => ['key' => KEY]]]
+    );
+
+    kirby()->impersonate('kirby');
+
+    $dialog = kirby()->extensions('areas')['cloudflare-tools'][0](kirby())['dialogs']['cloudflare-tools.license'];
+
+    try {
+        $dialog['submit']();
+        $this->fail('No exception');
+    } catch (\Kirby\Exception\Exception $e) {
+        // not 502: Cloudflare's proxy would swap it for its own HTML page
+        expect($e->getHttpCode())->toBe(424)
+            ->and($e->getMessage())->toContain('License key does not require activation')
+            ->and(file_exists(licenseFile()))->toBeFalse();
+    }
+});
+
 it('keeps non-admins out of the licence dialog', function () {
     fake();
 
