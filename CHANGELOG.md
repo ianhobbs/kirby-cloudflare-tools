@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.3 — 2026-11-25
 
 - Errors from Cloudflare or the licence server now reach the Panel as
   HTTP 424 instead of 502. On sites behind Cloudflare's proxy, Cloudflare
