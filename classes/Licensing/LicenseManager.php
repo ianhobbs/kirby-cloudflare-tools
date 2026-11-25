@@ -218,9 +218,12 @@ final class LicenseManager
             return $this->info();
         }
 
-        $result = empty($previous['activation']) === false
-            ? $this->provider->validate($key, $previous['activation'])
-            : $this->provider->activate($key, $website);
+        $result = match (true) {
+            empty($previous['activation']) === false  => $this->provider->validate($key, $previous['activation']),
+            // a key without activations (no limit) is only ever validated
+            ($previous['activates'] ?? null) === false => $this->provider->validate($key, null),
+            default                                    => $this->provider->activate($key, $website),
+        };
 
         $this->save($base + $result + [
             'display'  => $result['display'] ?? self::mask($key),
@@ -340,7 +343,11 @@ final class LicenseManager
         return match ($status) {
             'demo'     => 'This is a development site, so it needs no licence. Each public website needs one activation.',
             'missing'  => 'This public website has no licence key. Each public website needs one activation.',
-            'active'   => 'Licensed for ' . $this->website() . '.' . (isset($record['limit']) ? ' The key covers ' . $record['limit'] . ' ' . ($record['limit'] === 1 ? 'website' : 'websites') . '.' : ''),
+            'active'   => 'Licensed for ' . $this->website() . '.' . match (true) {
+                isset($record['limit'])                  => ' The key covers ' . $record['limit'] . ' ' . ($record['limit'] === 1 ? 'website' : 'websites') . '.',
+                ($record['activates'] ?? null) === false => ' The key covers any number of websites.',
+                default                                  => '',
+            },
             'inactive' => $record['message'] ?? 'The licence key was revoked or has expired.',
             default    => match (true) {
                 $this->website() === null                => 'Set Kirby\'s `url` option to this site\'s address, so the licence can be checked.',

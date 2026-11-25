@@ -128,6 +128,59 @@ it('passes on a refusal, and saves nothing', function () {
         ->and(file_exists(licenseFile()))->toBeFalse();
 });
 
+/** A fake Polar store whose key has no activation limit (an unlimited tier) */
+function unlimitedPolar(FakeCloudflare $fake): FakeCloudflare
+{
+    return polar($fake)
+        ->on('POST', '/v1/customer-portal/license-keys/activate', [
+            'error'  => 'NotPermitted',
+            'detail' => 'This license key does not support activations. Use the /validate endpoint instead to check license validity.',
+        ], 403)
+        ->on('POST', '/v1/customer-portal/license-keys/validate', polarKey(['limit_activations' => null]));
+}
+
+it('validates a key without an activation limit, instead of activating it', function () {
+    $fake = unlimitedPolar(new FakeCloudflare());
+    $info = manager($fake)->activate(KEY);
+
+    expect($info)->toMatchArray(['status' => 'active', 'limit' => null, 'source' => 'panel'])
+        ->and($info['message'])->toContain('any number of websites')
+        ->and($fake->calls())->toBe([
+            'POST /v1/customer-portal/license-keys/activate',
+            'POST /v1/customer-portal/license-keys/validate',
+        ])
+        ->and($fake->last()['body'])->toBe(['key' => KEY, 'organization_id' => ORG]);
+
+    $stored = json_decode(file_get_contents(licenseFile()), true);
+
+    expect($stored['activation'])->toBeNull()
+        ->and($stored['activates'])->toBeFalse();
+});
+
+it('re-checks a key without an activation limit by validating it only', function () {
+    $fake = unlimitedPolar(new FakeCloudflare());
+    $now  = 1_800_000_000;
+
+    manager($fake, now: $now)->activate(KEY);
+
+    $now += LicenseManager::CHECK_EVERY + 1;
+
+    expect(manager($fake, now: $now)->refresh())->toBe('active')
+        ->and(array_slice($fake->calls(), 2))->toBe(['POST /v1/customer-portal/license-keys/validate']);
+});
+
+it('still refuses a key that has used up its activations', function () {
+    // the key is granted, but has a limit: validating it is no way round that
+    $fake = polar(new FakeCloudflare())->on('POST', '/v1/customer-portal/license-keys/activate', [
+        'error'  => 'NotPermitted',
+        'detail' => 'License key activation limit reached',
+    ], 403);
+
+    expect(fn () => manager($fake)->activate(KEY))
+        ->toThrow(ApiException::class, 'License key activation limit reached')
+        ->and(file_exists(licenseFile()))->toBeFalse();
+});
+
 it('saves the key unverified until licence checks are switched on', function () {
     $fake = new FakeCloudflare();
     $info = manager($fake, organization: null)->activate(KEY);
@@ -238,7 +291,7 @@ it('activates from the licence dialog, for admins', function () {
 
 it('shows the seller\'s refusal in the licence dialog, as a status Cloudflare passes through', function () {
     $fake = polar(new FakeCloudflare())
-        ->on('POST', '/v1/customer-portal/license-keys/activate', ['detail' => 'License key does not require activation'], 403);
+        ->on('POST', '/v1/customer-portal/license-keys/activate', ['detail' => 'License key activation limit reached'], 403);
 
     bootKirby(
         ['licenseServer' => ['organization' => ORG], 'transport' => $fake],
@@ -255,7 +308,7 @@ it('shows the seller\'s refusal in the licence dialog, as a status Cloudflare pa
     } catch (\Kirby\Exception\Exception $e) {
         // not 502: Cloudflare's proxy would swap it for its own HTML page
         expect($e->getHttpCode())->toBe(424)
-            ->and($e->getMessage())->toContain('License key does not require activation')
+            ->and($e->getMessage())->toContain('License key activation limit reached')
             ->and(file_exists(licenseFile()))->toBeFalse();
     }
 });

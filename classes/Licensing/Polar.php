@@ -44,11 +44,27 @@ final class Polar implements Provider
 
     public function activate(string $key, string $label): array
     {
-        $json = $this->send('activate', [
-            'key'             => $key,
-            'organization_id' => $this->organization,
-            'label'           => $label,
-        ]);
+        try {
+            $json = $this->send('activate', [
+                'key'             => $key,
+                'organization_id' => $this->organization,
+                'label'           => $label,
+            ]);
+        } catch (ApiException $e) {
+            // Polar can't activate a key without an activation limit (an
+            // unlimited tier): it answers 403 and asks for /validate instead.
+            // Accept that only for a granted key that really has no limit, so
+            // a key that has used up its activations is still refused.
+            if ($e->status === 403) {
+                $result = $this->validate($key, null);
+
+                if ($result['status'] === 'active' && $result['activates'] === false) {
+                    return $result;
+                }
+            }
+
+            throw $e;
+        }
 
         return self::normalise($json['license_key'] ?? [], $json['id'] ?? null);
     }
@@ -66,7 +82,7 @@ final class Polar implements Provider
         } catch (ApiException $e) {
             // Polar answers 404 for revoked, disabled and expired keys too
             if ($e->status === 404) {
-                return ['status' => 'inactive', 'activation' => $activation, 'limit' => null, 'expires' => null, 'display' => null];
+                return ['status' => 'inactive', 'activation' => $activation, 'activates' => null, 'limit' => null, 'expires' => null, 'display' => null];
             }
 
             throw $e;
@@ -100,6 +116,8 @@ final class Polar implements Provider
         return [
             'status'     => ($key['status'] ?? null) === 'granted' && $expired === false ? 'active' : 'inactive',
             'activation' => $activation,
+            // Polar only counts activations for keys with a limit
+            'activates'  => isset($key['limit_activations']),
             'limit'      => isset($key['limit_activations']) ? (int)$key['limit_activations'] : null,
             'expires'    => $expires,
             'display'    => $key['display_key'] ?? null,

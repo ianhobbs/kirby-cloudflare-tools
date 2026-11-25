@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.4 — 2026-11-26
+
+- Unlimited licence keys now work. The licence server can't activate a key
+  without an activation limit, so the plugin used to refuse it ("This
+  license key does not support activations"). It now checks such a key
+  without activating it, every day as usual. A key that has used up its
+  activations is still refused.
+
 ## 1.0.3 — 2026-11-25
 
 - Errors from Cloudflare or the licence server now reach the Panel as

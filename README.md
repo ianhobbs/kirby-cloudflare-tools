@@ -478,7 +478,8 @@ works:
 - **On the command line**: `vendor/bin/kirby cloudflare-tools:license activate KEY`.
   Set Kirby's `url` option first, so the plugin knows the site's address.
 
-Each public website uses one activation of your key. Local and staging sites
+Each public website uses one activation of your key; an unlimited key is
+checked but not counted. Local and staging sites
 (`localhost`, `*.test`, `*.local`, `*.ddev.site`, private network addresses)
 need none. Add other staging hosts to `licenseIgnore`:
 
